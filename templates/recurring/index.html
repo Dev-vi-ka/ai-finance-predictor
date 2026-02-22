@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h3>Recurring Expenses</h3>
+
+    <a href="{{ url_for('recurring.add') }}" class="btn btn-primary mb-3">
+        Add Expense
+    </a>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Billing Day</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for expense in expenses %}
+            <tr>
+                <td>{{ expense['title'] }}</td>
+                <td>₹ {{ expense['amount'] }}</td>
+                <td>{{ expense['category'] }}</td>
+                <td>{{ expense['billing_day'] }}</td>
+
+                <td>
+                    <a href="{{ url_for('recurring.delete', expense_id=expense['id']) }}"
+                       class="btn btn-danger btn-sm">
+                       Remove
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

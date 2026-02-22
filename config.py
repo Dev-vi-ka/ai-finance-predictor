@@ -1,0 +1,7 @@
+import os
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+SECRET_KEY = "super-secret-key-change-later"
+
+DATABASE_PATH = os.path.join(BASE_DIR, "database", "finance.db")
