@@ -2,7 +2,8 @@ from flask import Blueprint, render_template, session, redirect, url_for
 from models.transaction_model import (
     get_transactions_by_user,
     get_financial_summary,
-    get_expense_by_category
+    get_expense_by_category,
+    calculate_health_score
 )
 
 dashboard_bp = Blueprint(
@@ -32,9 +33,8 @@ def index():
     # Category-wise expenses
     category_data = get_expense_by_category(user_id)
 
-    # Placeholder Financial Health Score
-    # (Later we replace this with rule-based logic or ML)
-    health_score = 80
+    # Calculate Financial Health Score
+    health_score = calculate_health_score(user_id)
 
     return render_template(
         'index.html',

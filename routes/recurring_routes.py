@@ -4,6 +4,7 @@ from models.recurring_model import (
     add_recurring_expense,
     deactivate_recurring_expense
 )
+from utils.auth_utils import validate_amount
 
 recurring_bp = Blueprint('recurring', __name__, template_folder='../templates/recurring')
 
@@ -28,22 +29,47 @@ def add():
         return redirect(url_for('auth.login'))
 
     if request.method == 'POST':
+        try:
+            title = request.form.get('title', '').strip()
+            amount = float(request.form.get('amount', 0))
+            category = request.form.get('category', '').strip()
+            billing_day = int(request.form.get('billing_day', 1))
+            
+            # Validate inputs
+            if not title or len(title) < 2:
+                flash("Title must be at least 2 characters.", "danger")
+                return redirect(url_for('recurring.add'))
+            
+            valid, msg = validate_amount(amount)
+            if not valid:
+                flash(msg, "danger")
+                return redirect(url_for('recurring.add'))
+            
+            if not category or len(category) < 2:
+                flash("Category must be at least 2 characters.", "danger")
+                return redirect(url_for('recurring.add'))
+            
+            if billing_day < 1 or billing_day > 31:
+                flash("Billing day must be between 1 and 31.", "danger")
+                return redirect(url_for('recurring.add'))
+            
+            add_recurring_expense(
+                session['user_id'],
+                title,
+                amount,
+                category,
+                billing_day
+            )
 
-        title = request.form['title']
-        amount = float(request.form['amount'])
-        category = request.form['category']
-        billing_day = int(request.form['billing_day'])
-
-        add_recurring_expense(
-            session['user_id'],
-            title,
-            amount,
-            category,
-            billing_day
-        )
-
-        flash("Recurring expense added successfully", "success")
-        return redirect(url_for('recurring.index'))
+            flash("Recurring expense added successfully", "success")
+            return redirect(url_for('recurring.index'))
+        
+        except ValueError:
+            flash("Invalid input data", "danger")
+            return redirect(url_for('recurring.add'))
+        except Exception as e:
+            flash(f"Error adding recurring expense: {str(e)}", "danger")
+            return redirect(url_for('recurring.add'))
 
     return render_template('recurring/add.html')
 
@@ -55,7 +81,10 @@ def delete(expense_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
-    deactivate_recurring_expense(expense_id, session['user_id'])
-
-    flash("Recurring expense removed", "warning")
+    try:
+        deactivate_recurring_expense(expense_id, session['user_id'])
+        flash("Recurring expense removed", "warning")
+    except Exception as e:
+        flash(f"Error removing recurring expense: {str(e)}", "danger")
+    
     return redirect(url_for('recurring.index'))

@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from models.transaction_model import add_transaction, get_transactions_by_user, delete_transaction
 from ml.category_classifier import predict_category
+from utils.auth_utils import validate_transaction_input, sanitize_string
 from datetime import date
 
 transaction_bp = Blueprint(
@@ -20,10 +21,24 @@ def add_transaction_route():
     if request.method == 'POST':
         user_id = session['user_id']
 
-        amount = float(request.form['amount'])
-        description = request.form['description']
-        txn_type = request.form['type']   # income or expense
-        txn_date = request.form['date']
+        try:
+            amount = float(request.form['amount'])
+            description = request.form['description']
+            txn_type = request.form['type']   # income or expense
+            txn_date = request.form['date']
+        except (ValueError, KeyError):
+            flash("Invalid input", "danger")
+            return redirect(url_for('transaction.add_transaction_route'))
+        
+        # Validate input
+        valid, errors = validate_transaction_input(description, amount, txn_type, txn_date)
+        if not valid:
+            for error in errors:
+                flash(error, "danger")
+            return redirect(url_for('transaction.add_transaction_route'))
+        
+        # Sanitize description
+        description = sanitize_string(description, 255)
 
         if txn_type == 'expense':
             category = predict_category(description)
@@ -34,16 +49,20 @@ def add_transaction_route():
             is_auto_tagged = 0
             amount = abs(amount) # Store income as positive
 
-        add_transaction(
-            user_id=user_id,
-            amount=amount,
-            description=description,
-            category=category,
-            date=txn_date,
-            is_auto_tagged=is_auto_tagged
-        )
+        try:
+            add_transaction(
+                user_id=user_id,
+                amount=amount,
+                description=description,
+                category=category,
+                date=txn_date,
+                is_auto_tagged=is_auto_tagged
+            )
+            flash("Transaction added successfully", "success")
+        except Exception as e:
+            flash(f"Error adding transaction: {str(e)}", "danger")
+            return redirect(url_for('transaction.add_transaction_route'))
 
-        flash("Transaction added successfully", "success")
         return redirect(url_for('transaction.history'))
 
     return render_template('add.html', today=date.today())
@@ -68,7 +87,10 @@ def delete(txn_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
-    delete_transaction(txn_id, session['user_id'])
-
-    flash("Transaction deleted", "info")
+    try:
+        delete_transaction(txn_id, session['user_id'])
+        flash("Transaction deleted", "info")
+    except Exception as e:
+        flash(f"Error deleting transaction: {str(e)}", "danger")
+    
     return redirect(url_for('transaction.history'))

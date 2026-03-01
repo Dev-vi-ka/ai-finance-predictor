@@ -1,70 +1,69 @@
 import sqlite3
 import os
+from datetime import datetime, timedelta
 from ml.expense_predictor import predict_next_month_spending
-from database.db_init import conn, cursor # Re-use init logic if we need to seed, but better to check existing data.
-
-# We need to mock a user or assume one exists. 
-# Let's check the database first.
 
 DB_PATH = "database/finance.db"
 
 def verify_prediction():
+    """Verify ML prediction functionality by creating test data if needed."""
+    
     if not os.path.exists(DB_PATH):
-        print("Database not found.")
+        print("Database not found. Please run 'python database/db_init.py' first.")
         return
 
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Check for users
+    # Check for existing users
     user = cursor.execute("SELECT * FROM users LIMIT 1").fetchone()
     if not user:
-        print("No users found. Creating dummy user and transactions...")
-        # Create dummy user
-        cursor.execute("INSERT INTO users (name, email, password_hash) VALUES ('Test User', 'test@example.com', 'hash')")
+        print("Creating test user and transactions...")
+        
+        # Create test user
+        cursor.execute(
+            "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
+            ('Test User', 'test@example.com', 'hash123')
+        )
         user_id = cursor.lastrowid
         
-        # Create dummy transactions for last 3 months
-        # Month 1: 1000
-        # Month 2: 1200
-        # Month 3: 1400
-        # Expected Month 4: ~1600
+        # Create test transactions for last 3 months (stored as negative for expenses)
+        base_date = datetime.now()
+        amounts = [-1000, -1200, -1400]  # Progressive increase
         
-        cursor.execute("INSERT INTO transactions (user_id, amount, date, type) VALUES (?, ?, ?, ?)", (user_id, -1000, '2023-01-15', 'expense'))
-        # Wait, the schema uses amount < 0 for expense, but the model code uses ABS(amount) where amount < 0.
-        # Let's check transaction_model.add_transaction
-        # It stores incoming positive amount, but relies on caller to decide...
-        # Wait, add_transaction takes `amount` and stores it. 
-        # get_financial_summary checks for amount < 0 for expense.
-        # So expenses should be stored as negative numbers?
-        # Let's check transaction_routes.py
-        # amount = abs(amount) ... wait.
-        # if txn_type == 'expense' ... 
-        # It calls add_transaction(..., amount=amount, ...)
-        # It seems add_transaction just inserts what it gets.
-        # But get_financial_summary queries `amount < 0`.
-        # Converting `amount` to negative in add_transaction might be missing in `transaction_routes.py`?
+        for i, amount in enumerate(amounts):
+            month_date = base_date - timedelta(days=30 * (2 - i))
+            date_str = month_date.strftime('%Y-%m-15')
+            cursor.execute(
+                "INSERT INTO transactions (user_id, amount, description, category, date) VALUES (?, ?, ?, ?, ?)",
+                (user_id, amount, f"Test expense {i+1}", "Miscellaneous", date_str)
+            )
         
-        # Let's check `transaction_routes.py` again.
-        # Line 37: amount = abs(amount).
-        # It seems it ALWAYS stores positive amount? 
-        # Then `get_financial_summary` checking `amount < 0` would fail?
-        
-        # Let's re-read transaction_routes.py carefully.
-        pass
-
+        conn.commit()
+        print(f"✓ Created test user (ID: {user_id}) with sample transactions")
     else:
         user_id = user[0]
-        print(f"Using existing user ID: {user_id}")
+        print(f"✓ Using existing user ID: {user_id}")
 
     conn.close()
 
-    # Run Prediction
+    # Test the prediction
+    print("\nRunning ML prediction...")
     try:
         result = predict_next_month_spending(user_id)
-        print("Prediction Result:", result)
+        
+        if result['predicted_amount'] > 0:
+            print(f"✓ Prediction successful!")
+            print(f"  Forecast for {result['prediction_month']}: ₹{result['predicted_amount']:.2f}")
+            print(f"  Historical data points: {len(result['actuals'])}")
+        else:
+            print("⚠ Prediction returned 0 (insufficient data)")
+            print(f"  Available data: {result['labels']}")
+            
     except Exception as e:
-        print("Error during prediction:", e)
+        print(f"✗ Error during prediction: {e}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     verify_prediction()
