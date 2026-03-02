@@ -5,6 +5,7 @@ from routes.dashboard_routes import dashboard_bp
 from routes.transaction_routes import transaction_bp
 from routes.recurring_routes import recurring_bp
 from routes.prediction_routes import prediction_bp
+from routes.budget_routes import budget_bp
 import os
 
 def create_app():
@@ -40,6 +41,7 @@ def create_app():
     app.register_blueprint(transaction_bp)
     app.register_blueprint(recurring_bp)
     app.register_blueprint(prediction_bp)
+    app.register_blueprint(budget_bp)
     return app
 
 if __name__ == "__main__":

@@ -52,10 +52,130 @@
         <a href="{{ url_for('transaction.add_transaction_route') }}" class="btn btn-success me-2">
             Add Transaction
         </a>
-        <a href="{{ url_for('recurring.index') }}" class="btn btn-warning">
+        <a href="{{ url_for('recurring.index') }}" class="btn btn-warning me-2">
             Manage Recurring Bills
         </a>
+        <a href="{{ url_for('budget.view_budgets') }}" class="btn btn-primary me-2">
+            💰 View Budgets
+        </a>
+        {% if alert_count > 0 %}
+        <a href="{{ url_for('budget.view_alerts') }}" class="btn btn-outline-danger">
+            🔔 {{ alert_count }} Alert{{ 's' if alert_count != 1 else '' }}
+        </a>
+        {% endif %}
     </div>
+
+    <!-- Budget Overview Section -->
+    {% if budgets %}
+    <div class="row mt-4 mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h5 class="mb-0">💰 Budget Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <div class="text-center">
+                                <h6 class="text-muted">Total Budgets</h6>
+                                <h3 class="text-primary">{{ budgets|length }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="text-center">
+                                <h6 class="text-muted">On Track</h6>
+                                <h3 class="text-success">{{ budgets|selectattr('status', 'equalto', 'OK')|list|length }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="text-center">
+                                <h6 class="text-muted">Warnings</h6>
+                                <h3 class="text-warning">{{ warning_budgets|length }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="text-center">
+                                <h6 class="text-muted">Critical</h6>
+                                <h3 class="text-danger">{{ critical_budgets|length }}</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Critical & Warning Budgets -->
+                    {% if critical_budgets or warning_budgets %}
+                    <hr>
+                    <div class="row">
+                        {% for budget in (critical_budgets + warning_budgets)[:4] %}
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="p-3 rounded" style="border-left: 5px solid {% if budget.status == 'Critical' %}#dc3545{% else %}#ffc107{% endif %}; background-color: #f8f9fa;">
+                                <p class="mb-2 fw-bold">{{ budget.category }}</p>
+                                <div class="progress mb-2" role="progressbar" style="height: 20px;">
+                                    <div class="progress-bar {% if budget.status == 'Critical' %}bg-danger{% else %}bg-warning{% endif %}" 
+                                         style="width: {{ [budget.percentage, 100]|min }}%">
+                                        <small class="fw-bold">{{ "%.0f"|format(budget.percentage) }}%</small>
+                                    </div>
+                                </div>
+                                <small class="text-muted">${{ "%.2f"|format(budget.spent) }} / ${{ "%.2f"|format(budget.limit) }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('budget.view_budgets') }}" class="btn btn-sm btn-outline-primary">
+                            View All Budgets →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Budget Setup Prompt -->
+    <div class="row mt-4 mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0 bg-light">
+                <div class="card-body text-center py-4">
+                    <h5>💡 Set Your First Budget</h5>
+                    <p class="text-muted mb-3">Create budgets to track your spending and receive alerts when you're near limits.</p>
+                    <a href="{{ url_for('budget.set_budget_route') }}" class="btn btn-primary">
+                        + Set Budget
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Alerts -->
+    {% if unread_alerts %}
+    <div class="row mt-4 mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                    <h5 class="mb-0">🔔 Recent Budget Alerts</h5>
+                </div>
+                <div class="card-body">
+                    {% for alert in unread_alerts[:5] %}
+                    <div class="alert {% if alert.alert_type == 'budget_exceeded' %}alert-danger{% elif alert.alert_type == 'budget_critical' %}alert-warning{% else %}alert-info{% endif %} mb-2 py-2">
+                        <strong>{{ alert.title }}</strong><br>
+                        <small>{{ alert.message }}</small>
+                    </div>
+                    {% endfor %}
+                    {% if unread_alerts|length > 5 %}
+                    <p class="text-muted text-center mb-0">+ {{ unread_alerts|length - 5 }} more alerts</p>
+                    {% endif %}
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('budget.view_alerts') }}" class="btn btn-sm btn-outline-primary">
+                            View All Alerts →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
 
     <!-- Prediction Chart Section -->

@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Budget Overview{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>💰 Monthly Budgets</h2>
+            <p class="text-muted">Track your spending against monthly limits</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('budget.set_budget_route') }}" class="btn btn-primary btn-lg">
+                + Set New Budget
+            </a>
+        </div>
+    </div>
+
+    {% if budgets %}
+    <!-- Month Selector -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <form method="GET" class="input-group">
+                <label class="input-group-text" for="month-select">Select Month:</label>
+                <input type="month" class="form-control" id="month-select" name="month" 
+                       value="{{ month }}" onchange="this.form.submit()">
+            </form>
+        </div>
+    </div>
+
+    <!-- Budget Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Budgets</h6>
+                    <h3 class="text-primary">{{ budgets|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">On Track</h6>
+                    <h3 class="text-success">{{ budgets|selectattr('status', 'equalto', 'OK')|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Warnings</h6>
+                    <h3 class="text-warning">{{ budgets|selectattr('status', 'equalto', 'Warning')|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Critical</h6>
+                    <h3 class="text-danger">{{ budgets|selectattr('status', 'equalto', 'Critical')|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Cards -->
+    <div class="row">
+        {% for budget in budgets %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header {% if budget.status == 'Critical' %}bg-danger{% elif budget.status == 'Warning' %}bg-warning{% else %}bg-success{% endif %} text-white">
+                    <h5 class="mb-0">
+                        {% if budget.status == 'Critical' %}🔴{% elif budget.status == 'Warning' %}🟡{% else %}🟢{% endif %}
+                        {{ budget.category }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Progress Bar -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="small fw-bold">Spent</span>
+                            <span class="small fw-bold">${{ "%.2f"|format(budget.spent) }} / ${{ "%.2f"|format(budget.limit) }}</span>
+                        </div>
+                        <div class="progress" role="progressbar" style="height: 25px;">
+                            <div class="progress-bar {% if budget.percentage >= 100 %}bg-danger{% elif budget.percentage >= 80 %}bg-warning{% else %}bg-success{% endif %}"
+                                 style="width: {{ [budget.percentage, 100]|min }}%">
+                                <small class="fw-bold">{{ "%.1f"|format(budget.percentage) }}%</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="small text-muted mb-3">
+                        <p class="mb-1">📊 Status: <strong>{{ budget.status }}</strong></p>
+                        <p class="mb-1">💰 Remaining: 
+                            <strong class="{% if budget.percentage >= 100 %}text-danger{% elif budget.percentage >= 80 %}text-warning{% else %}text-success{% endif %}">
+                                ${{ "%.2f"|format([budget.remaining, 0]|max) }}
+                            </strong>
+                        </p>
+                    </div>
+
+                    {% if budget.percentage >= 100 %}
+                    <div class="alert alert-danger py-2 px-2 mb-0 small">
+                        <strong>Budget Exceeded!</strong><br>
+                        You've spent ${{"%.2f"|format(budget.spent - budget.limit)}} over the limit.
+                    </div>
+                    {% elif budget.percentage >= 80 %}
+                    <div class="alert alert-warning py-2 px-2 mb-0 small">
+                        <strong>Caution!</strong><br>
+                        Only ${{ "%.2f"|format(budget.remaining) }} left.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card text-center p-5">
+                <div class="mb-3" style="font-size: 3rem;">💾</div>
+                <h4>No Budgets Set Yet</h4>
+                <p class="text-muted">Start by creating a budget for your first expense category.</p>
+                <a href="{{ url_for('budget.set_budget_route') }}" class="btn btn-primary">
+                    Create Your First Budget
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .card-header {
+        border-radius: 0.75rem 0.75rem 0 0;
+        border: none;
+    }
+    
+    .progress {
+        border-radius: 0.5rem;
+        background-color: #e9ecef;
+    }
+    
+    .progress-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}

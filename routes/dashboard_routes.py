@@ -5,6 +5,8 @@ from models.transaction_model import (
     get_expense_by_category,
     calculate_health_score
 )
+from models.budget_model import get_all_budget_status
+from models.alert_model import get_unread_alerts, get_unread_alert_count
 
 dashboard_bp = Blueprint(
     'dashboard',
@@ -36,6 +38,15 @@ def index():
     # Calculate Financial Health Score
     health_score = calculate_health_score(user_id)
 
+    # --- Fetch Budget Data ---
+    budgets = get_all_budget_status(user_id)
+    unread_alerts = get_unread_alerts(user_id)
+    alert_count = get_unread_alert_count(user_id)
+    
+    # Get critical and warning budgets
+    critical_budgets = [b for b in budgets if b['status'] == 'Critical']
+    warning_budgets = [b for b in budgets if b['status'] == 'Warning']
+
     return render_template(
         'index.html',
         user_name=session.get('user_name', 'User'),
@@ -44,5 +55,10 @@ def index():
         total_expense=total_expense,
         savings=savings,
         health_score=health_score,
-        category_data=category_data
+        category_data=category_data,
+        budgets=budgets,
+        critical_budgets=critical_budgets,
+        warning_budgets=warning_budgets,
+        unread_alerts=unread_alerts,
+        alert_count=alert_count
     )
