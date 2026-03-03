@@ -5,42 +5,143 @@
 
     <h3>Transaction History</h3>
 
-    <a href="{{ url_for('transaction.add_transaction_route') }}" class="btn btn-success">
-       Add New
-    </a>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <a href="{{ url_for('transaction.add_transaction_route') }}" class="btn btn-success">
+               Add New Transaction
+            </a>
+        </div>
+        <div class="col-md-6">
+            <form method="GET" class="form-inline">
+                <label for="monthFilter" class="mr-2">Filter by Month:</label>
+                <select name="month" id="monthFilter" class="form-control mr-2" onchange="this.form.submit();">
+                    <option value="">All Months</option>
+                    {% set all_available_months = [] %}
+                    {% for month in transactions_by_month.keys() %}
+                        {% if all_available_months.append(month) %}{% endif %}
+                        <option value="{{ month }}" {% if selected_month == month %}selected{% endif %}>
+                            {{ month }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Category</th>
-                <th>Amount</th>
-                <th></th>
-            </tr>
-        </thead>
+    {% if selected_month and monthly_summary %}
+    <div class="alert alert-info mb-4">
+        <strong>Monthly Summary for {{ selected_month }}:</strong>
+        <div class="row mt-2">
+            <div class="col-md-3">
+                <strong>Income:</strong> <span class="text-success">₹ {{ "%.2f"|format(monthly_summary['income']) }}</span>
+            </div>
+            <div class="col-md-3">
+                <strong>Expense:</strong> <span class="text-danger">₹ {{ "%.2f"|format(monthly_summary['expense']) }}</span>
+            </div>
+            <div class="col-md-3">
+                <strong>Savings:</strong> 
+                <span class="{% if monthly_summary['savings'] >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    ₹ {{ "%.2f"|format(monthly_summary['savings']) }}
+                </span>
+            </div>
+            <div class="col-md-3">
+                <strong>Savings Rate:</strong> 
+                {% if monthly_summary['income'] > 0 %}
+                    <span class="badge badge-info">
+                        {{ "%.1f"|format((monthly_summary['savings'] / monthly_summary['income']) * 100) }}%
+                    </span>
+                {% else %}
+                    <span class="badge badge-secondary">N/A</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
-        <tbody>
-        {% for txn in transactions %}
-            <tr>
-                <td>{{ txn['date'] }}</td>
-                <td>{{ txn['description'] }}</td>
-                <td>{{ txn['category'] }}</td>
+    {% if monthly_expenses %}
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5>Category Breakdown {% if selected_month %} - {{ selected_month }}{% endif %}</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Transactions</th>
+                        <th>Total Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in monthly_expenses %}
+                        <tr>
+                            <td>{{ expense['category'] }}</td>
+                            <td><span class="badge badge-light">{{ expense['count'] }}</span></td>
+                            <td class="text-danger">₹ {{ "%.2f"|format(expense['total']) }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">No expenses in this period</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
 
-                <td class="{% if txn['amount'] < 0 %}text-danger{% else %}text-success{% endif %}">
-                    ₹ {{ txn['amount'] }}
-                </td>
+    <h5>Transactions {% if selected_month %} - {{ selected_month }}{% endif %}</h5>
 
-                <td>
-                    <a href="{{ url_for('transaction.delete', txn_id=txn['id']) }}" 
-                       class="btn btn-sm btn-danger">
-                       Delete
-                    </a>
-                </td>
-            </tr>
+    {% if transactions_by_month %}
+        {% for month, txns in transactions_by_month.items() %}
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <strong>{{ month }}</strong>
+                    <span class="badge badge-secondary float-right">{{ txns|length }} transactions</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for txn in txns %}
+                                <tr>
+                                    <td>{{ txn['date'] }}</td>
+                                    <td>{{ txn['description'] }}</td>
+                                    <td>
+                                        <span class="badge badge-pill {% if txn['category'] == 'Income' %}badge-success{% else %}badge-warning{% endif %}">
+                                            {{ txn['category'] }}
+                                        </span>
+                                    </td>
+                                    <td class="{% if txn['amount'] < 0 %}text-danger font-weight-bold{% else %}text-success font-weight-bold{% endif %}">
+                                        ₹ {{ txn['amount'] }}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('transaction.delete', txn_id=txn['id']) }}" 
+                                           class="btn btn-sm btn-danger"
+                                           onclick="return confirm('Delete this transaction?');">
+                                           Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         {% endfor %}
-        </tbody>
-    </table>
+    {% else %}
+        <div class="alert alert-info">
+            No transactions found.
+        </div>
+    {% endif %}
 
 </div>
 {% endblock %}

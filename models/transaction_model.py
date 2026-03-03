@@ -104,6 +104,114 @@ def get_monthly_expenses(user_id):
     return [{"month": row["month"], "total": row["total"]} for row in rows]
 
 
+# -------- Get Transactions Grouped by Month --------
+def get_transactions_by_month(user_id, month=None):
+    """Get all transactions for a user, optionally filtered by month (YYYY-MM format).
+    Returns a dict where keys are months and values are lists of transactions.
+    """
+    from collections import OrderedDict
+    
+    conn = get_db_connection()
+    
+    if month:
+        rows = conn.execute("""
+            SELECT * FROM transactions
+            WHERE user_id = ? AND strftime('%Y-%m', date) = ?
+            ORDER BY date DESC
+        """, (user_id, month)).fetchall()
+    else:
+        rows = conn.execute("""
+            SELECT * FROM transactions
+            WHERE user_id = ?
+            ORDER BY date DESC
+        """, (user_id,)).fetchall()
+    
+    conn.close()
+    
+    # Group by month
+    grouped = OrderedDict()
+    
+    for row in rows:
+        # Extract month from date (YYYY-MM format)
+        row_month = row['date'][:7]  # Assuming format YYYY-MM-DD
+        
+        if row_month not in grouped:
+            grouped[row_month] = []
+        grouped[row_month].append(dict(row))
+    
+    return grouped
+
+
+# -------- Get Expense by Month and Category --------
+def get_expense_by_month_and_category(user_id, month=None):
+    """Get expenses grouped by month and category.
+    Returns list of dicts with month, category, and total.
+    """
+    conn = get_db_connection()
+    
+    if month:
+        rows = conn.execute("""
+            SELECT 
+                strftime('%Y-%m', date) as month,
+                category, 
+                ABS(SUM(amount)) as total,
+                COUNT(*) as count
+            FROM transactions
+            WHERE user_id = ? AND amount < 0 AND strftime('%Y-%m', date) = ?
+            GROUP BY month, category
+            ORDER BY month DESC, total DESC
+        """, (user_id, month)).fetchall()
+    else:
+        rows = conn.execute("""
+            SELECT 
+                strftime('%Y-%m', date) as month,
+                category, 
+                ABS(SUM(amount)) as total,
+                COUNT(*) as count
+            FROM transactions
+            WHERE user_id = ? AND amount < 0
+            GROUP BY month, category
+            ORDER BY month DESC, total DESC
+        """, (user_id,)).fetchall()
+    
+    conn.close()
+    
+    return [{
+        "month": row["month"],
+        "category": row["category"],
+        "total": row["total"],
+        "count": row["count"]
+    } for row in rows]
+
+
+# -------- Get Monthly Summary --------
+def get_monthly_summary(user_id, month):
+    """Get complete monthly summary - income, expense, and savings for a specific month.
+    """
+    conn = get_db_connection()
+    
+    result = conn.execute("""
+        SELECT 
+            SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END) as income,
+            ABS(SUM(CASE WHEN amount < 0 THEN amount ELSE 0 END)) as expense
+        FROM transactions
+        WHERE user_id = ? AND strftime('%Y-%m', date) = ?
+    """, (user_id, month)).fetchone()
+    
+    conn.close()
+    
+    income = result['income'] or 0
+    expense = result['expense'] or 0
+    savings = income - expense
+    
+    return {
+        "month": month,
+        "income": income,
+        "expense": expense,
+        "savings": savings
+    }
+
+
 # ---------------- Financial Health Score ----------------
 def calculate_health_score(user_id):
     """Calculate financial health score (0-100) based on spending patterns.
@@ -193,3 +301,22 @@ def calculate_health_score(user_id):
     
     # Ensure score is within 0-100
     return max(0, min(100, int(score)))
+
+
+# -------- Get All Available Months --------
+def get_all_available_months(user_id):
+    """Get all distinct months that have transactions for a user, sorted in descending order.
+    Returns a list of month strings in YYYY-MM format.
+    """
+    conn = get_db_connection()
+    
+    rows = conn.execute("""
+        SELECT DISTINCT strftime('%Y-%m', date) as month
+        FROM transactions
+        WHERE user_id = ?
+        ORDER BY month DESC
+    """, (user_id,)).fetchall()
+    
+    conn.close()
+    
+    return [row['month'] for row in rows]

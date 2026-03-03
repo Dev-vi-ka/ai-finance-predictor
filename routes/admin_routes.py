@@ -1,4 +1,6 @@
 from flask import Blueprint, render_template, session, redirect, url_for, jsonify, request
+from config import ADMIN_EMAILS
+from models.user_model import get_user_by_id
 from models.admin_model import (
     get_admin_dashboard_data,
     get_total_users,
@@ -35,12 +37,9 @@ def require_admin():
             if 'user_id' not in session:
                 return redirect(url_for('auth.login'))
             
-            # TODO: Implement proper admin role checking
-            # For now, you can use environment variable or hardcoded admin emails
-            admin_emails = ['admin@finance.com']  # Change to your admin email
-            admin_user_id = 1  # Default admin user ID
-            
-            if session.get('user_id') != admin_user_id:
+            # Check if user is admin by email
+            user = get_user_by_id(session.get('user_id'))
+            if not user or user['email'] not in ADMIN_EMAILS:
                 return redirect(url_for('dashboard.index'))
             
             return f(*args, **kwargs)

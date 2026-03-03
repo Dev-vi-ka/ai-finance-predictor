@@ -12,7 +12,10 @@
         <!-- Navigation Items -->
         <nav class="flex-1 space-y-6 text-lg">
             <a href="{{ url_for('transaction.add_transaction_route') }}" class="block hover:text-yellow-300 transition-colors">
-                Add new transaction
+                ➕ Add / Bulk Upload Transactions
+            </a>
+            <a href="{{ url_for('transaction.history') }}" class="block hover:text-yellow-300 transition-colors">
+                📊 View All Transactions
             </a>
             <a href="{{ url_for('recurring.index') }}" class="block hover:text-yellow-300 transition-colors">
                 Manage Recurring bills
@@ -38,7 +41,7 @@
         </div>
 
         <!-- Admin Panel Link (Only for Admin) -->
-        {% if session.get('user_id') == 1 %}
+        {% if is_admin %}
         <div class="space-y-3 mb-6">
             <div class="bg-yellow-600 rounded-lg p-3">
                 <a href="{{ url_for('admin.dashboard') }}" class="block text-white font-semibold text-center hover:text-yellow-100 transition-colors text-sm">
@@ -83,6 +86,51 @@
                     </svg>
                 </div>
             </div>
+
+            <!-- Month Filter Section -->
+            <div class="mb-6">
+                <form method="GET" class="inline-flex items-center gap-3">
+                    <label for="monthFilterDash" class="text-gray-700 font-semibold">Filter by Month:</label>
+                    <select name="month" id="monthFilterDash" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" onchange="this.form.submit();">
+                        <option value="">All Time</option>
+                        {% for month in available_months %}
+                            <option value="{{ month }}" {% if selected_month == month %}selected{% endif %}>
+                                {{ month }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <a href="{{ url_for('dashboard.index') }}" class="text-blue-600 hover:underline text-sm font-semibold{% if not selected_month %} hidden{% endif %}">Clear Filter</a>
+                </form>
+            </div>
+            {% if selected_month and monthly_summary %}
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p class="text-sm text-gray-600 mb-2"><strong>Month Selected:</strong> {{ selected_month }}</p>
+                <div class="grid grid-cols-4 gap-4 text-center">
+                    <div>
+                        <p class="text-gray-600 text-sm">Income</p>
+                        <p class="text-lg font-bold text-green-600">₹{{ "%.2f"|format(monthly_summary['income']) }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Expense</p>
+                        <p class="text-lg font-bold text-red-600">₹{{ "%.2f"|format(monthly_summary['expense']) }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Savings</p>
+                        <p class="text-lg font-bold {% if monthly_summary['savings'] >= 0 %}text-green-600{% else %}text-red-600{% endif %}">₹{{ "%.2f"|format(monthly_summary['savings']) }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Savings Rate</p>
+                        <p class="text-lg font-bold text-blue-600">
+                            {% if monthly_summary['income'] > 0 %}
+                                {{ "%.1f"|format((monthly_summary['savings'] / monthly_summary['income']) * 100) }}%
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Overview Section -->
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Overview</h2>

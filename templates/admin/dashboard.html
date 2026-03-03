@@ -105,29 +105,6 @@
         color: #333;
     }
 
-    .quick-links {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-    }
-
-    .quick-link {
-        display: block;
-        padding: 15px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        text-decoration: none;
-        border-radius: 8px;
-        text-align: center;
-        transition: transform 0.3s;
-        font-weight: 600;
-    }
-
-    .quick-link:hover {
-        transform: scale(1.05);
-        color: white;
-    }
-
     .alert-box {
         padding: 15px;
         border-radius: 8px;
@@ -289,19 +266,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
-    </div>
-
-    <!-- QUICK ACCESS -->
-    <div class="section-card">
-        <h2 class="section-title">🔗 Quick Access</h2>
-        <div class="quick-links">
-            <a href="{{ url_for('admin.aggregated_metrics') }}" class="quick-link">📈 Aggregated Metrics</a>
-            <a href="{{ url_for('admin.trends') }}" class="quick-link">📉 Trend Analysis</a>
-            <a href="{{ url_for('admin.model_performance') }}" class="quick-link">🧠 Model Performance</a>
-            <a href="{{ url_for('admin.monitoring') }}" class="quick-link">📡 Real-time Monitor</a>
-            <a href="{{ url_for('admin.analytics') }}" class="quick-link">📊 Advanced Analytics</a>
-            <a href="{{ url_for('admin.export_report', format='json') }}" class="quick-link">⬇️ Export Report</a>
         </div>
     </div>
 
