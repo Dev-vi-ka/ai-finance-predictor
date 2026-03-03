@@ -1,278 +1,362 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-5">
-
-    <h2 class="mb-4">Welcome, {{ user_name }} 👋</h2>
-
-    <!-- Summary Cards -->
-    <div class="row">
-
-        <div class="col-md-3 mb-3">
-            <div class="card text-center shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-muted">Income</h6>
-                    <h4 class="text-success">₹ {{ total_income }}</h4>
-                </div>
-            </div>
+<div class="flex h-screen bg-gray-100">
+    <!-- Sidebar Navigation -->
+    <div class="w-80 bg-gradient-to-b from-purple-700 to-purple-800 text-white p-8 flex flex-col">
+        <!-- Logo -->
+        <div class="mb-12">
+            <h1 class="text-3xl font-bold">◆ Spendora</h1>
         </div>
 
-        <div class="col-md-3 mb-3">
-            <div class="card text-center shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-muted">Expenses</h6>
-                    <h4 class="text-danger">₹ {{ total_expense }}</h4>
-                </div>
-            </div>
+        <!-- Navigation Items -->
+        <nav class="flex-1 space-y-6 text-lg">
+            <a href="{{ url_for('transaction.add_transaction_route') }}" class="block hover:text-yellow-300 transition-colors">
+                Add new transaction
+            </a>
+            <a href="{{ url_for('recurring.index') }}" class="block hover:text-yellow-300 transition-colors">
+                Manage Recurring bills
+            </a>
+            <a href="{{ url_for('budget.set_budget_route') }}" class="block hover:text-yellow-300 transition-colors">
+                Add Budget
+            </a>
+            <button id="togglePredictionBtn" class="block hover:text-yellow-300 transition-colors text-left w-full">
+                See next month's prediction
+            </button>
+            <button id="toggleExpenseBtn" class="block hover:text-yellow-300 transition-colors text-left w-full">
+                Expense Breakdown
+            </button>
+            <button id="toggleTransactionBtn" class="block hover:text-yellow-300 transition-colors text-left w-full">
+                Recent transactions
+            </button>
+        </nav>
+
+        <!-- Health Score Card -->
+        <div class="bg-red-500 rounded-2xl p-6 text-center mb-6">
+            <p class="text-white text-sm opacity-90 mb-2">Health score</p>
+            <h2 class="text-5xl font-bold text-white">{{ health_score }}%</h2>
         </div>
 
-        <div class="col-md-3 mb-3">
-            <div class="card text-center shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-muted">Savings</h6>
-                    <h4 class="text-primary">₹ {{ savings }}</h4>
-                </div>
+        <!-- Admin Panel Link (Only for Admin) -->
+        {% if session.get('user_id') == 1 %}
+        <div class="space-y-3 mb-6">
+            <div class="bg-yellow-600 rounded-lg p-3">
+                <a href="{{ url_for('admin.dashboard') }}" class="block text-white font-semibold text-center hover:text-yellow-100 transition-colors text-sm">
+                    👑 Admin Panel
+                </a>
+            </div>
+            <div class="bg-yellow-600 bg-opacity-75 rounded-lg p-2">
+                <a href="{{ url_for('admin.analytics') }}" class="block text-white font-semibold text-center hover:text-yellow-100 transition-colors text-xs">
+                    📊 Analytics
+                </a>
+            </div>
+            <div class="bg-yellow-600 bg-opacity-75 rounded-lg p-2">
+                <a href="{{ url_for('admin.export_report', format='json') }}" class="block text-white font-semibold text-center hover:text-yellow-100 transition-colors text-xs">
+                    ⬇️ Export Report
+                </a>
             </div>
         </div>
-
-        <div class="col-md-3 mb-3">
-            <div class="card text-center shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-muted">Health Score</h6>
-                    <h4>{{ health_score }}%</h4>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-
-    <!-- Quick Actions -->
-    <div class="mt-4 mb-4">
-        <a href="{{ url_for('transaction.add_transaction_route') }}" class="btn btn-success me-2">
-            Add Transaction
-        </a>
-        <a href="{{ url_for('recurring.index') }}" class="btn btn-warning me-2">
-            Manage Recurring Bills
-        </a>
-        <a href="{{ url_for('budget.view_budgets') }}" class="btn btn-primary me-2">
-            💰 View Budgets
-        </a>
-        {% if alert_count > 0 %}
-        <a href="{{ url_for('budget.view_alerts') }}" class="btn btn-outline-danger">
-            🔔 {{ alert_count }} Alert{{ 's' if alert_count != 1 else '' }}
-        </a>
         {% endif %}
+
+        <!-- Logout Button -->
+        <a href="{{ url_for('auth.logout') }}" class="block text-center hover:text-yellow-300 transition-colors font-semibold">
+            Logout
+        </a>
     </div>
 
-    <!-- Budget Overview Section -->
-    {% if budgets %}
-    <div class="row mt-4 mb-4">
-        <div class="col-md-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                    <h5 class="mb-0">💰 Budget Overview</h5>
+    <!-- Main Content Area -->
+    <div class="flex-1 overflow-auto">
+        <div class="p-8">
+
+            <!-- Greeting Header -->
+            <div class="bg-gradient-to-r from-purple-300 to-pink-300 rounded-3xl p-8 mb-8 flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-800 mb-2">Hi, {{ user_name }}</h1>
+                    <p class="text-gray-700">Lorem ipsum doloe se emit Lorem ipsum</p>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 mb-2">
-                            <div class="text-center">
-                                <h6 class="text-muted">Total Budgets</h6>
-                                <h3 class="text-primary">{{ budgets|length }}</h3>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <div class="text-center">
-                                <h6 class="text-muted">On Track</h6>
-                                <h3 class="text-success">{{ budgets|selectattr('status', 'equalto', 'OK')|list|length }}</h3>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <div class="text-center">
-                                <h6 class="text-muted">Warnings</h6>
-                                <h3 class="text-warning">{{ warning_budgets|length }}</h3>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <div class="text-center">
-                                <h6 class="text-muted">Critical</h6>
-                                <h3 class="text-danger">{{ critical_budgets|length }}</h3>
-                            </div>
-                        </div>
-                    </div>
+                <div class="w-32 h-32 opacity-80">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                        <circle cx="100" cy="80" r="30" fill="#8B5A3C"/>
+                        <ellipse cx="100" cy="120" rx="40" ry="45" fill="#D4A574"/>
+                        <ellipse cx="75" cy="100" rx="25" ry="30" fill="#B8956A"/>
+                        <ellipse cx="125" cy="100" rx="25" ry="30" fill="#B8956A"/>
+                    </svg>
+                </div>
+            </div>
 
-                    <!-- Top Critical & Warning Budgets -->
-                    {% if critical_budgets or warning_budgets %}
-                    <hr>
-                    <div class="row">
-                        {% for budget in (critical_budgets + warning_budgets)[:4] %}
-                        <div class="col-md-6 col-lg-3 mb-3">
-                            <div class="p-3 rounded" style="border-left: 5px solid {% if budget.status == 'Critical' %}#dc3545{% else %}#ffc107{% endif %}; background-color: #f8f9fa;">
-                                <p class="mb-2 fw-bold">{{ budget.category }}</p>
-                                <div class="progress mb-2" role="progressbar" style="height: 20px;">
-                                    <div class="progress-bar {% if budget.status == 'Critical' %}bg-danger{% else %}bg-warning{% endif %}" 
-                                         style="width: {{ [budget.percentage, 100]|min }}%">
-                                        <small class="fw-bold">{{ "%.0f"|format(budget.percentage) }}%</small>
-                                    </div>
-                                </div>
-                                <small class="text-muted">${{ "%.2f"|format(budget.spent) }} / ${{ "%.2f"|format(budget.limit) }}</small>
-                            </div>
-                        </div>
-                        {% endfor %}
+            <!-- Overview Section -->
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Overview</h2>
+            <div class="grid grid-cols-3 gap-6 mb-8">
+                <!-- Income Card -->
+                <div class="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl p-6 text-white shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-4xl">💰</span>
                     </div>
-                    {% endif %}
+                    <h3 class="text-3xl font-bold mb-1">${{ total_income }}</h3>
+                    <p class="text-yellow-100 font-semibold">Income</p>
+                </div>
 
-                    <div class="text-center mt-3">
-                        <a href="{{ url_for('budget.view_budgets') }}" class="btn btn-sm btn-outline-primary">
-                            View All Budgets →
-                        </a>
+                <!-- Expense Card -->
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-4xl">💸</span>
+                    </div>
+                    <h3 class="text-3xl font-bold mb-1">${{ total_expense }}</h3>
+                    <p class="text-purple-100 font-semibold">Expense</p>
+                </div>
+
+                <!-- Savings Card -->
+                <div class="bg-gradient-to-br from-pink-400 to-pink-500 rounded-2xl p-6 text-white shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-4xl">🏦</span>
+                    </div>
+                    <h3 class="text-3xl font-bold mb-1">${{ savings }}</h3>
+                    <p class="text-pink-100 font-semibold">Savings</p>
+                </div>
+            </div>
+
+            <!-- Prediction Chart Section -->
+            <div id="predictionChartContainer" class="hidden mb-8">
+                <div class="bg-white rounded-xl p-6 shadow-md">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Spending Trend & Prediction 🔮</h3>
+                    <p id="predictionText" class="text-gray-500 mb-4">Loading prediction...</p>
+                    <canvas id="predictionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Expense Breakdown Section -->
+            <div id="expenseChartContainer" class="hidden mb-8">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl p-6 shadow-md">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Expense Breakdown (Pie Chart)</h3>
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-md">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Budget Tracking (Bar Chart)</h3>
+                        <canvas id="budgetChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions Section -->
+            <div id="transactionContainer" class="hidden">
+                <div class="bg-white rounded-xl p-6 shadow-md">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Recent Transactions</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="border-b-2 border-gray-200">
+                                <tr class="text-left text-gray-600 text-sm">
+                                    <th class="pb-3">Date</th>
+                                    <th class="pb-3">Description</th>
+                                    <th class="pb-3">Category</th>
+                                    <th class="pb-3 text-right">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for txn in recent_transactions %}
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="py-3 text-gray-700">{{ txn['date'] }}</td>
+                                    <td class="py-3 text-gray-700">{{ txn['description'] }}</td>
+                                    <td class="py-3 text-gray-700">{{ txn['category'] }}</td>
+                                    <td class="py-3 text-right">
+                                        {% if txn['amount'] > 0 %}
+                                        <span class="text-green-600 font-semibold">+ ₹{{ txn['amount'] }}</span>
+                                        {% else %}
+                                        <span class="text-red-600 font-semibold">- ₹{{ txn['amount'] | abs }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    {% else %}
-    <!-- Budget Setup Prompt -->
-    <div class="row mt-4 mb-4">
-        <div class="col-md-12">
-            <div class="card shadow-sm border-0 bg-light">
-                <div class="card-body text-center py-4">
-                    <h5>💡 Set Your First Budget</h5>
-                    <p class="text-muted mb-3">Create budgets to track your spending and receive alerts when you're near limits.</p>
-                    <a href="{{ url_for('budget.set_budget_route') }}" class="btn btn-primary">
-                        + Set Budget
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Recent Alerts -->
-    {% if unread_alerts %}
-    <div class="row mt-4 mb-4">
-        <div class="col-md-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
-                    <h5 class="mb-0">🔔 Recent Budget Alerts</h5>
-                </div>
-                <div class="card-body">
-                    {% for alert in unread_alerts[:5] %}
-                    <div class="alert {% if alert.alert_type == 'budget_exceeded' %}alert-danger{% elif alert.alert_type == 'budget_critical' %}alert-warning{% else %}alert-info{% endif %} mb-2 py-2">
-                        <strong>{{ alert.title }}</strong><br>
-                        <small>{{ alert.message }}</small>
-                    </div>
-                    {% endfor %}
-                    {% if unread_alerts|length > 5 %}
-                    <p class="text-muted text-center mb-0">+ {{ unread_alerts|length - 5 }} more alerts</p>
-                    {% endif %}
-                    <div class="text-center mt-3">
-                        <a href="{{ url_for('budget.view_alerts') }}" class="btn btn-sm btn-outline-primary">
-                            View All Alerts →
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-
-    <!-- Prediction Chart Section -->
-    <div class="card shadow-sm border-0 mt-4">
-        <div class="card-body">
-            <h5 class="card-title">Spending Trend & Prediction 🔮</h5>
-            <p id="predictionText" class="text-muted">Loading prediction...</p>
-            <canvas id="predictionChart"></canvas>
-        </div>
-    </div>
-
-
-    <!-- Chart Section -->
-    <div class="card shadow-sm border-0 mt-4">
-        <div class="card-body">
-            <h5 class="card-title">Expense Breakdown</h5>
-            <canvas id="expenseChart"></canvas>
-        </div>
-    </div>
-
-
-    <!-- Recent Transactions -->
-    <div class="card shadow-sm border-0 mt-5">
-        <div class="card-body">
-            <h5 class="card-title mb-3">Recent Transactions</h5>
-
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Date</th>
-                            <th>Description</th>
-                            <th>Category</th>
-                            <th class="text-end">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for txn in recent_transactions %}
-                        <tr>
-                            <td>{{ txn['date'] }}</td>
-                            <td>{{ txn['description'] }}</td>
-                            <td>{{ txn['category'] }}</td>
-                            <td class="text-end">
-                                {% if txn['amount'] > 0 %}
-                                <span class="text-success">+ ₹{{ txn['amount'] }}</span>
-                                {% else %}
-                                <span class="text-danger">- ₹{{ txn['amount'] | abs }}</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-    </div>
-
 </div>
-
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<script type="application/json" id="categoryDataScript">
+{{ category_data | tojson }}
+</script>
+
 <script>
-    const categoryData = {{ category_data | tojson }};
+    // Get toggle buttons and containers
+    const togglePredictionBtn = document.getElementById('togglePredictionBtn');
+    const toggleExpenseBtn = document.getElementById('toggleExpenseBtn');
+    const toggleTransactionBtn = document.getElementById('toggleTransactionBtn');
+    
+    const predictionChartContainer = document.getElementById('predictionChartContainer');
+    const expenseChartContainer = document.getElementById('expenseChartContainer');
+    const transactionContainer = document.getElementById('transactionContainer');
+    
+    let predictionChartInitialized = false;
+    let expenseChartInitialized = false;
 
-    const labels = categoryData.map(item => item.category);
-    const values = categoryData.map(item => item.total);
-
-    const ctx = document.getElementById('expenseChart').getContext('2d');
-
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor: [
-                    '#4e73df',
-                    '#1cc88a',
-                    '#36b9cc',
-                    '#f6c23e',
-                    '#e74a3b',
-                    '#858796'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
+    // Toggle Prediction Chart
+    togglePredictionBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        predictionChartContainer.classList.toggle('hidden');
+        
+        if (!predictionChartContainer.classList.contains('hidden') && !predictionChartInitialized) {
+            initializePredictionChart();
+            predictionChartInitialized = true;
+        }
+        
+        if (!predictionChartContainer.classList.contains('hidden')) {
+            predictionChartContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     });
+
+    // Toggle Expense Breakdown
+    toggleExpenseBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        expenseChartContainer.classList.toggle('hidden');
+        
+        if (!expenseChartContainer.classList.contains('hidden') && !expenseChartInitialized) {
+            initializeExpenseCharts();
+            expenseChartInitialized = true;
+        }
+        
+        if (!expenseChartContainer.classList.contains('hidden')) {
+            expenseChartContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+    // Toggle Recent Transactions
+    toggleTransactionBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        transactionContainer.classList.toggle('hidden');
+        
+        if (!transactionContainer.classList.contains('hidden')) {
+            transactionContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+    function initializePredictionChart() {
+        // Parse category data from script tag
+        const categoryDataJson = document.getElementById('categoryDataScript').textContent;
+        const categoryData = JSON.parse(categoryDataJson);
+
+        const labels = categoryData.map(item => item.category);
+        const values = categoryData.map(item => item.total);
+
+        const ctx = document.getElementById('predictionChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Spending Trend',
+                    data: values,
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    function initializeExpenseCharts() {
+        // Parse category data from script tag
+        const categoryDataJson = document.getElementById('categoryDataScript').textContent;
+        const categoryData = JSON.parse(categoryDataJson);
+
+        const labels = categoryData.map(item => item.category);
+        const values = categoryData.map(item => item.total);
+
+        // Pie Chart
+        const pieCtx = document.getElementById('expenseChart').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: [
+                        '#4e73df',
+                        '#1cc88a',
+                        '#36b9cc',
+                        '#f6c23e',
+                        '#e74a3b',
+                        '#858796'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Bar Chart for Budget Tracking
+        const barCtx = document.getElementById('budgetChart').getContext('2d');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Money Spent by Category',
+                    data: values,
+                    backgroundColor: [
+                        '#667eea',
+                        '#764ba2',
+                        '#f093fb',
+                        '#4facfe',
+                        '#00f2fe',
+                        '#43e97b'
+                    ],
+                    borderColor: [
+                        '#667eea',
+                        '#764ba2',
+                        '#f093fb',
+                        '#4facfe',
+                        '#00f2fe',
+                        '#43e97b'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
 </script>
 
 {% endblock %}

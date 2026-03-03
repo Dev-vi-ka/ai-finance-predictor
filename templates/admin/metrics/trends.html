@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block title %}Trend Analysis - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trends-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .trends-header {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    .trends-header h1 {
+        margin: 0;
+        color: #333;
+        font-size: 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .trend-section {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .trend-section h2 {
+        font-size: 1.5rem;
+        color: #333;
+        margin-top: 0;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .growth-item {
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .growth-name {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .growth-stats {
+        display: flex;
+        gap: 30px;
+        font-size: 0.9rem;
+    }
+
+    .growth-stat {
+        text-align: right;
+    }
+
+    .growth-stat-label {
+        color: #999;
+        font-size: 0.85rem;
+    }
+
+    .growth-stat-value {
+        font-weight: bold;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .growth-rate {
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        text-align: center;
+        min-width: 100px;
+    }
+
+    .growth-positive {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    .growth-negative {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .seasonal-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .seasonal-table th {
+        background: #f5f5f5;
+        padding: 12px;
+        text-align: left;
+        border-bottom: 2px solid #ddd;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .seasonal-table td {
+        padding: 12px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .seasonal-table tr:hover {
+        background: #fafafa;
+    }
+
+    .spike-card {
+        background: #fff3e0;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #ff9800;
+    }
+
+    .spike-title {
+        font-weight: 600;
+        color: #e65100;
+        margin-bottom: 10px;
+    }
+
+    .spike-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .insight-box {
+        background: #e3f2fd;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #2196f3;
+        margin: 20px 0;
+        color: #0d47a1;
+    }
+
+    .insight-box h4 {
+        margin-top: 0;
+        color: #1565c0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #999;
+    }
+
+    @media (max-width: 768px) {
+        .trends-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .growth-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .growth-stats {
+            width: 100%;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .growth-rate {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="trends-container">
+    <div class="trends-header">
+        <a href="{{ url_for('admin.dashboard') }}" class="back-link">← Back to Dashboard</a>
+        <h1>📉 Trend Analysis</h1>
+        <p style="margin: 10px 0 0 0; color: #666;">Spending patterns and growth trends across users</p>
+    </div>
+
+    <!-- CATEGORY GROWTH TRENDS -->
+    <div class="trend-section">
+        <h2>📈 Most Growing Expense Categories (Last 6 Months)</h2>
+        <p style="color: #666; margin-bottom: 20px;">Categories with highest growth rates</p>
+        
+        {% if category_growth %}
+        <div>
+            {% for category, data in category_growth.items() %}
+            <div class="growth-item">
+                <div style="flex: 1;">
+                    <div class="growth-name">{{ category }}</div>
+                </div>
+                <div class="growth-stats">
+                    <div class="growth-stat">
+                        <div class="growth-stat-label">Current</div>
+                        <div class="growth-stat-value">₹{{ "%.0f"|format(data.current_month) }}</div>
+                    </div>
+                    <div class="growth-stat">
+                        <div class="growth-stat-label">Previous</div>
+                        <div class="growth-stat-value">₹{{ "%.0f"|format(data.previous_month) }}</div>
+                    </div>
+                    <div class="growth-rate {% if data.growth_rate > 0 %}growth-positive{% else %}growth-negative{% endif %}">
+                        {% if data.growth_rate > 0 %}
+                            ↗️ +{{ "%.1f"|format(data.growth_rate) }}%
+                        {% else %}
+                            ↘️ {{ "%.1f"|format(data.growth_rate) }}%
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="insight-box">
+            <h4>💡 Key Insight</h4>
+            {% set top_growth = category_growth|first %}
+            <p>{{ top_growth[0] }} spending increased {{ "%.1f"|format(top_growth[1].growth_rate) }}% this month, reaching ₹{{ "%.0f"|format(top_growth[1].current_month) }}. This is the fastest growing expense category across your user base.</p>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No growth data available yet. Data will appear as users add transactions.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- SEASONAL TRENDS -->
+    <div class="trend-section">
+        <h2>🎄 Seasonal Spending Patterns</h2>
+        <p style="color: #666; margin-bottom: 20px;">Average spending by category during this month across historical data</p>
+        
+        {% if seasonal_trends %}
+        <table class="seasonal-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th style="text-align: right;">Average Spending</th>
+                    <th style="text-align: right;">Peak Spending</th>
+                    <th style="text-align: right;">Occurrences</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trend in seasonal_trends %}
+                <tr>
+                    <td><strong>{{ trend.category }}</strong></td>
+                    <td style="text-align: right;">₹{{ "%.2f"|format(trend.avg_spending) }}</td>
+                    <td style="text-align: right;">₹{{ "%.2f"|format(trend.peak_spending) }}</td>
+                    <td style="text-align: right;">{{ trend.occurrences }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="insight-box">
+            <h4>💡 Seasonal Insights</h4>
+            {% set top_seasonal = seasonal_trends[0] %}
+            <p><strong>{{ top_seasonal.category }}</strong> shows strong seasonal patterns, with peak spending of ₹{{ "%.0f"|format(top_seasonal.peak_spending) }} recorded. This indicates festive or seasonal buying behavior to monitor during budgeting periods.</p>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>Insufficient historical data to identify seasonal patterns yet.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- SPENDING SPIKES -->
+    <div class="trend-section">
+        <h2>⚡ Spending Anomalies & Spikes</h2>
+        <p style="color: #666; margin-bottom: 20px;">Users with notable spending spikes in specific categories</p>
+        
+        {% if spending_spikes %}
+        <div>
+            {% for spike in spending_spikes %}
+            <div class="spike-card">
+                <div class="spike-title">
+                    {% if spike.user_id %}User {{ spike.user_id }}{% else %}User Data{% endif %} - {{ spike.category }}
+                </div>
+                <div class="spike-details">
+                    <div>
+                        <strong>Spike Count:</strong><br>
+                        {{ spike.spike_count }} transactions
+                    </div>
+                    <div>
+                        <strong>Avg Amount:</strong><br>
+                        ₹{{ "%.2f"|format(spike.avg_amount) }}
+                    </div>
+                    <div>
+                        <strong>Max Amount:</strong><br>
+                        ₹{{ "%.2f"|format(spike.max_amount) }}
+                    </div>
+                    <div>
+                        <strong>Latest:</strong><br>
+                        {{ spike.date }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="insight-box">
+            <h4>⚠️ Action Required</h4>
+            <p>Identified {{ spending_spikes|length }} anomalies. Review these spending patterns to provide timely alerts to affected users.</p>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No notable spending anomalies detected in the user base.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- RECOMMENDATIONS -->
+    <div class="trend-section">
+        <h2>🎯 Recommendations</h2>
+        <div style="display: grid; gap: 15px;">
+            <div style="padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                <strong style="color: #333;">Monitor Growing Categories</strong>
+                <p style="color: #666; margin: 10px 0 0 0;">Send notifications to users whose top spending categories are growing faster than 10% month-over-month</p>
+            </div>
+            <div style="padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                <strong style="color: #333;">Seasonal Planning</strong>
+                <p style="color: #666; margin: 10px 0 0 0;">Use seasonal patterns to set realistic budget expectations and help users prepare for predictable spikes</p>
+            </div>
+            <div style="padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                <strong style="color: #333;">Anomaly Response</strong>
+                <p style="color: #666; margin: 10px 0 0 0;">Implement automated alerts for users experiencing unusual spending patterns to encourage conscious spending</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

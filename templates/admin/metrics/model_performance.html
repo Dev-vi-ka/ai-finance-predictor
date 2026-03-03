@@ -1,0 +1,473 @@
+{% extends "base.html" %}
+
+{% block title %}Model Performance - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .model-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .model-header {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    .model-header h1 {
+        margin: 0;
+        color: #333;
+        font-size: 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .status-healthy {
+        background: #4caf50;
+        color: white;
+    }
+
+    .status-acceptable {
+        background: #ff9800;
+        color: white;
+    }
+
+    .status-needs-attention {
+        background: #f44336;
+        color: white;
+    }
+
+    .model-section {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .model-section h2 {
+        font-size: 1.5rem;
+        color: #333;
+        margin-top: 0;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .performance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+    }
+
+    .performance-metric {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        border-radius: 8px;
+        color: white;
+        text-align: center;
+    }
+
+    .performance-metric-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 10px;
+    }
+
+    .performance-metric-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+
+    .performance-metric-subtext {
+        font-size: 0.8rem;
+        opacity: 0.85;
+        margin-top: 10px;
+    }
+
+    .drift-indicator {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .drift-stable {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .drift-improving {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .drift-concerning {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    .error-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .error-table th {
+        background: #f5f5f5;
+        padding: 12px;
+        text-align: left;
+        border-bottom: 2px solid #ddd;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .error-table td {
+        padding: 12px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .error-table tr:hover {
+        background: #fafafa;
+    }
+
+    .misclassified-item {
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        border-left: 4px solid #ff6b6b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .misclassified-category {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .misclassified-stats {
+        display: flex;
+        gap: 20px;
+        font-size: 0.9rem;
+    }
+
+    .misclassified-stat {
+        text-align: right;
+    }
+
+    .misclassified-stat-label {
+        color: #999;
+        font-size: 0.85rem;
+    }
+
+    .misclassified-stat-value {
+        font-weight: bold;
+        color: #f44336;
+        font-size: 1.1rem;
+    }
+
+    .alert-box {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border-left: 4px solid;
+    }
+
+    .alert-critical {
+        background: #ffebee;
+        border-left-color: #f44336;
+        color: #c62828;
+    }
+
+    .alert-warning {
+        background: #fff3e0;
+        border-left-color: #ff9800;
+        color: #e65100;
+    }
+
+    .alert-info {
+        background: #e3f2fd;
+        border-left-color: #2196f3;
+        color: #0d47a1;
+    }
+
+    .recommendation-box {
+        background: #f5f5f5;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+        margin: 20px 0;
+    }
+
+    .recommendation-box h4 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .recommendation-box ul {
+        color: #666;
+        line-height: 1.8;
+    }
+
+    @media (max-width: 768px) {
+        .model-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .performance-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .misclassified-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .misclassified-stats {
+            width: 100%;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="model-container">
+    <div class="model-header">
+        <a href="{{ url_for('admin.dashboard') }}" class="back-link">← Back to Dashboard</a>
+        <h1>
+            🧠 ML Model Performance
+            <span class="status-badge status-{{ model_status }}">{{ model_status|replace('_', ' ')|title }}</span>
+        </h1>
+        <p style="margin: 10px 0 0 0; color: #666;">Model health metrics and performance indicators</p>
+    </div>
+
+    <!-- KEY PERFORMANCE INDICATORS -->
+    <div class="model-section">
+        <h2>📊 Key Performance Indicators</h2>
+        <div class="performance-grid">
+            <div class="performance-metric">
+                <div class="performance-metric-label">Accuracy</div>
+                <div class="performance-metric-value">{{ "%.1f"|format(accuracy) }}%</div>
+                <div class="performance-metric-subtext">Auto-tagged accuracy</div>
+            </div>
+            <div class="performance-metric">
+                <div class="performance-metric-label">Correction Rate</div>
+                <div class="performance-metric-value">{{ "%.1f"|format(correction_rate) }}%</div>
+                <div class="performance-metric-subtext">User corrections</div>
+            </div>
+            <div class="performance-metric">
+                <div class="performance-metric-label">Model Drift</div>
+                <div class="performance-metric-value">{{ drift_detection.drift_value }}%</div>
+                <div class="performance-metric-subtext">30-day change</div>
+                <div class="drift-indicator drift-{{ drift_detection.drift_status }}">
+                    {{ drift_detection.drift_status|replace('_', ' ')|title }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALERTS & NOTIFICATIONS -->
+    {% if accuracy < 75 %}
+    <div class="model-section">
+        <div class="alert-box alert-critical">
+            ⚠️ <strong>Critical:</strong> Model accuracy has dropped to {{ "%.1f"|format(accuracy) }}%. This is below the acceptable threshold of 75%. Immediate action required.
+        </div>
+    </div>
+    {% endif %}
+
+    {% if drift_detection.drift_status == 'concerning' %}
+    <div class="model-section">
+        <div class="alert-box alert-critical">
+            ⚠️ <strong>Critical:</strong> Model drift detected! Error rate increased by {{ drift_detection.drift_value }}%. The model may be experiencing performance degradation.
+        </div>
+    </div>
+    {% endif %}
+
+    {% if correction_rate > 15 %}
+    <div class="model-section">
+        <div class="alert-box alert-warning">
+            ⚠️ <strong>Warning:</strong> High user correction rate: {{ "%.1f"|format(correction_rate) }}%. Users are frequently correcting category predictions.
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- DETAILED METRICS -->
+    <div class="model-section">
+        <h2>📈 Detailed Performance Analysis</h2>
+        
+        <div style="margin: 20px 0;">
+            <strong style="color: #333; display: block; margin-bottom: 10px;">📌 Categorization Accuracy</strong>
+            <p style="color: #666;">
+                {{ "%.1f"|format(accuracy) }}% of auto-tagged transactions are correct. This indicates how well the model is performing at category classification.
+            </p>
+            <div style="background: #f0f0f0; border-radius: 8px; height: 30px; overflow: hidden; margin-top: 10px;">
+                <div style="background: linear-gradient(90deg, #667eea, #764ba2); height: 100%; width: {{ accuracy }}%; transition: width 0.3s;" data-width="{{ accuracy }}"></div>
+            </div>
+        </div>
+
+        <div style="margin: 20px 0; padding-top: 20px; border-top: 1px solid #f0f0f0;">
+            <strong style="color: #333; display: block; margin-bottom: 10px;">👥 User Correction Rate</strong>
+            <p style="color: #666;">
+                {{ "%.1f"|format(correction_rate) }}% of auto-tagged transactions have been corrected by users. Lower is better - indicates model accuracy.
+            </p>
+            {% set correction_bg = '#f44336' if correction_rate > 20 else '#ff9800' if correction_rate > 10 else '#4caf50' %}
+            <div style="background: #f0f0f0; border-radius: 8px; height: 30px; overflow: hidden; margin-top: 10px;">
+                <div style="background: {{ correction_bg }}; height: 100%; width: {{ correction_rate }}%; transition: width 0.3s;"></div>
+            </div>
+        </div>
+
+        <div style="margin: 20px 0; padding-top: 20px; border-top: 1px solid #f0f0f0;">
+            <strong style="color: #333; display: block; margin-bottom: 10px;">🔄 Model Drift Detection</strong>
+            <p style="color: #666;">
+                Recent error rate: <strong>{{ "%.1f"|format(drift_detection.recent_error_rate) }}%</strong> vs Historical: <strong>{{ "%.1f"|format(drift_detection.historical_error_rate) }}%</strong>
+            </p>
+            <p style="color: #666; margin-top: 10px;">
+                {% if drift_detection.drift_status == 'stable' %}
+                    ✅ Model performance is stable. Continue monitoring.
+                {% elif drift_detection.drift_status == 'improving' %}
+                    📈 Model performance is improving! Keep up the good work.
+                {% else %}
+                    ⚠️ Model performance is degrading. Consider retraining or investigating data shift.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- PREDICTION ERRORS -->
+    <div class="model-section">
+        <h2>❌ Top Prediction Errors</h2>
+        <p style="color: #666; margin-bottom: 20px;">Categories with most misclassifications</p>
+        
+        {% if prediction_errors %}
+        <table class="error-table">
+            <thead>
+                <tr>
+                    <th>Original Category</th>
+                    <th>Misclassified As</th>
+                    <th style="text-align: right;">Error Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for error in prediction_errors[:10] %}
+                <tr>
+                    <td><strong>{{ error.original_category }}</strong></td>
+                    <td>{{ error.corrected_category }}</td>
+                    <td style="text-align: right;">{{ error.error_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: #999; text-align: center; padding: 20px;">No prediction errors recorded yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- MOST MISCLASSIFIED CATEGORIES -->
+    {% if misclassified_categories %}
+    <div class="model-section">
+        <h2>📊 Most Misclassified Categories</h2>
+        <p style="color: #666; margin-bottom: 20px;">Categories that need model improvement</p>
+        
+        <div>
+            {% for cat in misclassified_categories[:5] %}
+            <div class="misclassified-item">
+                <div style="flex: 1;">
+                    <div class="misclassified-category">{{ cat.category }}</div>
+                </div>
+                <div class="misclassified-stats">
+                    <div class="misclassified-stat">
+                        <div class="misclassified-stat-label">Errors</div>
+                        <div class="misclassified-stat-value">{{ cat.error_count }}</div>
+                    </div>
+                    <div class="misclassified-stat">
+                        <div class="misclassified-stat-label">% of Total</div>
+                        <div class="misclassified-stat-value">{{ "%.1f"|format(cat.error_percentage) }}%</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- RECOMMENDATIONS -->
+    <div class="model-section">
+        <h2>🎯 Recommendations</h2>
+        
+        <div class="recommendation-box">
+            <h4>🔧 Model Improvement Actions</h4>
+            <ul>
+                {% if accuracy < 75 %}
+                <li><strong>Urgent:</strong> Model accuracy below 75%. Consider retraining with more recent data or reviewing training data quality.</li>
+                {% endif %}
+                
+                {% if correction_rate > 15 %}
+                <li><strong>High Priority:</strong> Users correcting {{ "%.1f"|format(correction_rate) }}% of predictions. Review frequently misclassified categories and retrain with corrected data.</li>
+                {% endif %}
+                
+                {% if drift_detection.drift_status == 'concerning' %}
+                <li><strong>Critical:</strong> Model drift detected. Data distribution may have changed. Consider retraining or investigating for data drift.</li>
+                {% else %}
+                <li>✅ Model drift is under control. Continue regular monitoring.</li>
+                {% endif %}
+                
+                <li>Review and use user corrections as feedback to improve model accuracy over time.</li>
+                <li>Consider implementing A/B testing for new model versions before full deployment.</li>
+            </ul>
+        </div>
+
+        <div class="recommendation-box" style="border-left-color: #4caf50;">
+            <h4>✅ Best Practices</h4>
+            <ul>
+                <li>Monitor model accuracy weekly to catch degradation early</li>
+                <li>Use user corrections as training data for model improvement</li>
+                <li>Set up automated alerts for accuracy drops below 75%</li>
+                <li>Implement regular retraining cycles (monthly or quarterly)</li>
+                <li>Track performance metrics over time to identify trends</li>
+                <li>Document data shifts or external factors affecting accuracy</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- LAST UPDATED -->
+    <div style="text-align: center; color: #999; font-size: 0.9rem; margin-top: 30px;">
+        <p>Last updated: {{ now | strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        <p><a href="{{ url_for('admin.monitoring') }}" style="color: #667eea; text-decoration: none;">View real-time monitoring →</a></p>
+    </div>
+
+</div>
+{% endblock %}

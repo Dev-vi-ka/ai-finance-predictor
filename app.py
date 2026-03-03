@@ -6,6 +6,7 @@ from routes.transaction_routes import transaction_bp
 from routes.recurring_routes import recurring_bp
 from routes.prediction_routes import prediction_bp
 from routes.budget_routes import budget_bp
+from routes.admin_routes import admin_bp
 import os
 
 def create_app():
@@ -26,6 +27,10 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = SECRET_KEY
 
+    # Register custom Jinja2 filters
+    from datetime import datetime
+    app.jinja_env.filters['strftime'] = lambda dt, fmt: dt.strftime(fmt) if hasattr(dt, 'strftime') else datetime.now().strftime(fmt)
+
     # Register blueprints
     app.register_blueprint(auth_bp)
 
@@ -42,6 +47,7 @@ def create_app():
     app.register_blueprint(recurring_bp)
     app.register_blueprint(prediction_bp)
     app.register_blueprint(budget_bp)
+    app.register_blueprint(admin_bp)
     return app
 
 if __name__ == "__main__":

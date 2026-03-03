@@ -82,6 +82,32 @@ def init_database():
     )
     """)
 
+    # ---------------- ML Model Metrics Table ----------------
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS ml_model_metrics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        metric_type TEXT NOT NULL,
+        value REAL NOT NULL,
+        metadata TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(metric_type, created_at)
+    )
+    """)
+
+    # ---------------- Model Corrections Table ----------------
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS model_corrections (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        transaction_id INTEGER NOT NULL,
+        original_category TEXT,
+        corrected_category TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (transaction_id) REFERENCES transactions(id)
+    )
+    """)
+
     conn.commit()
     conn.close()
 
