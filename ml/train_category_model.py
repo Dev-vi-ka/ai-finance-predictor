@@ -31,14 +31,38 @@ def train_model():
     categories = [row[1] for row in data]
 
     try:
-        # Use TF-IDF vectorization
-        vectorizer = TfidfVectorizer(max_features=100, lowercase=True, stop_words='english')
-        X = vectorizer.fit_transform(descriptions)
+        unique_categories = list(set(categories))
         
-        # Use MultinomialNB for sparse data
+        from sklearn.pipeline import Pipeline
+        from sklearn.ensemble import RandomForestClassifier
         from sklearn.linear_model import LogisticRegression
-        model = LogisticRegression(max_iter=200)
-        model.fit(X, categories)
+        
+        # If all transactions share exactly the same category, ML algorithms will crash 
+        # because they require >= 2 classes. We must handle this gracefully!
+        if len(unique_categories) == 1:
+            print(f"Warning: Only 1 unique category found '{unique_categories[0]}'. Cannot train full ML model. Generating fallback model.")
+            # Dummy model that always predicts the single class
+            class DummyModel:
+                def __init__(self, single_class):
+                    self.single_class = single_class
+                def predict(self, X):
+                    import numpy as np
+                    return np.array([self.single_class] * X.shape[0])
+            
+            vectorizer = TfidfVectorizer(max_features=10)
+            vectorizer.fit(["dummy text"]) # fit on dummy text so it doesn't fail on transform
+            model = DummyModel(unique_categories[0])
+            
+        else:
+            # Full advanced NLP classification pipeline
+            vectorizer = TfidfVectorizer(max_features=500, ngram_range=(1, 2), lowercase=True, stop_words='english')
+            
+            # Use Random Forest for robust text categorization based on description keywords
+            classifier = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
+            
+            X = vectorizer.fit_transform(descriptions)
+            model = classifier
+            model.fit(X, categories)
 
         # Save model and vectorizer
         os.makedirs("ml", exist_ok=True)
@@ -50,6 +74,8 @@ def train_model():
         
     except Exception as e:
         print(f"Error training model: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 

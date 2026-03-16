@@ -224,6 +224,10 @@ def calculate_health_score(user_id):
     """
     income, expenses, savings = get_financial_summary(user_id)
     
+    # If there is no financial activity, return 0 instead of base score
+    if income == 0 and expenses == 0:
+        return 0
+        
     score = 50  # Base score
     
     # Factor 1: Savings Ratio (0-30 points)

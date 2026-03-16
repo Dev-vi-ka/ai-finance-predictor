@@ -21,12 +21,12 @@ def register():
         if not valid:
             for error in errors:
                 flash(error, "danger")
-            return redirect(url_for('auth.register'))
+            return render_template('auth/register.html', name=name, email=email)
 
         # Check if email already registered
         if get_user_by_email(email):
             flash("Email already registered", "danger")
-            return redirect(url_for('auth.register'))
+            return render_template('auth/register.html', name=name, email=email)
 
         try:
             # Sanitize name
@@ -38,7 +38,7 @@ def register():
             return redirect(url_for('auth.login'))
         except Exception as e:
             flash(f"Registration error: {str(e)}", "danger")
-            return redirect(url_for('auth.register'))
+            return render_template('auth/register.html', name=name, email=email)
 
     return render_template('auth/register.html')
 
