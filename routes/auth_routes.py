@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from werkzeug.security import generate_password_hash, check_password_hash
 from models.user_model import create_user, get_user_by_email
 from utils.auth_utils import validate_user_registration, sanitize_string
+from config import ADMIN_EMAILS
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -60,6 +61,8 @@ def login():
         if user and check_password_hash(user['password_hash'], password):
             session['user_id'] = user['id']
             session['user_name'] = user['name']
+            session['user_email'] = email
+            session['is_admin'] = email in ADMIN_EMAILS
 
             flash("Login successful", "success")
             return redirect(url_for('dashboard.index'))

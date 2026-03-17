@@ -1,147 +1,152 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-5">
-
-    <h3>Transaction History</h3>
-
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <a href="{{ url_for('transaction.add_transaction_route') }}" class="btn btn-success">
-               Add New Transaction
-            </a>
+<div class="py-6 space-y-8">
+    
+    <!-- Header with Filter -->
+    <div class="flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-gray-100 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-gray-800 flex items-center">
+                <span class="bg-indigo-100 text-indigo-600 p-2 rounded-xl mr-3 h-10 w-10 flex items-center justify-center">📚</span> 
+                Transaction History
+            </h1>
+            <p class="text-gray-500 font-medium mt-1 md:ml-14">Review and manage your past records</p>
         </div>
-        <div class="col-md-6">
-            <form method="GET" class="form-inline">
-                <label for="monthFilter" class="mr-2">Filter by Month:</label>
-                <select name="month" id="monthFilter" class="form-control mr-2" onchange="this.form.submit();">
-                    <option value="">All Months</option>
-                    {% set all_available_months = [] %}
-                    {% for month in transactions_by_month.keys() %}
-                        {% if all_available_months.append(month) %}{% endif %}
-                        <option value="{{ month }}" {% if selected_month == month %}selected{% endif %}>
-                            {{ month }}
-                        </option>
+        
+        <div class="flex items-center gap-4 w-full md:w-auto">
+            <a href="{{ url_for('transaction.add_transaction_route') }}" class="hidden md:flex bg-gray-900 text-white font-bold py-2.5 px-5 rounded-xl hover:bg-gray-800 transition-colors shadow-md items-center">
+                <span>+ Add</span>
+            </a>
+            <form method="GET" class="w-full md:w-auto relative">
+                <select name="month" class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-800 font-semibold rounded-xl pl-4 pr-10 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none cursor-pointer" onchange="this.form.submit();">
+                    <option value="">All Time History</option>
+                    {% for month in all_months %}
+                        <option value="{{ month }}" {% if selected_month == month %}selected{% endif %}>{{ month }}</option>
                     {% endfor %}
                 </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
             </form>
         </div>
     </div>
 
+    <!-- Monthly Summary Section (if filtered) -->
     {% if selected_month and monthly_summary %}
-    <div class="alert alert-info mb-4">
-        <strong>Monthly Summary for {{ selected_month }}:</strong>
-        <div class="row mt-2">
-            <div class="col-md-3">
-                <strong>Income:</strong> <span class="text-success">₹ {{ "%.2f"|format(monthly_summary['income']) }}</span>
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-3xl p-8 shadow-sm">
+        <h4 class="font-bold text-blue-900 text-xl flex items-center mb-6">
+            <svg class="w-6 h-6 mr-2 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            Summary for {{ selected_month }}
+        </h4>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white rounded-2xl p-5 shadow-sm">
+                <p class="text-xs text-green-600 font-bold uppercase tracking-wider mb-1">Income</p>
+                <p class="text-2xl font-black text-gray-800">₹{{ "%.2f"|format(monthly_summary['income']) }}</p>
             </div>
-            <div class="col-md-3">
-                <strong>Expense:</strong> <span class="text-danger">₹ {{ "%.2f"|format(monthly_summary['expense']) }}</span>
+            <div class="bg-white rounded-2xl p-5 shadow-sm">
+                <p class="text-xs text-red-500 font-bold uppercase tracking-wider mb-1">Expense</p>
+                <p class="text-2xl font-black text-gray-800">₹{{ "%.2f"|format(monthly_summary['expense']) }}</p>
             </div>
-            <div class="col-md-3">
-                <strong>Savings:</strong> 
-                <span class="{% if monthly_summary['savings'] >= 0 %}text-success{% else %}text-danger{% endif %}">
-                    ₹ {{ "%.2f"|format(monthly_summary['savings']) }}
-                </span>
+            <div class="bg-white rounded-2xl p-5 shadow-sm">
+                <p class="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1">Net Savings</p>
+                <p class="text-2xl font-black {% if monthly_summary['savings'] >= 0 %}text-green-600{% else %}text-red-500{% endif %}">₹{{ "%.2f"|format(monthly_summary['savings']) }}</p>
             </div>
-            <div class="col-md-3">
-                <strong>Savings Rate:</strong> 
-                {% if monthly_summary['income'] > 0 %}
-                    <span class="badge badge-info">
+            <div class="bg-white rounded-2xl p-5 shadow-sm">
+                <p class="text-xs text-purple-600 font-bold uppercase tracking-wider mb-1">Savings Rate</p>
+                <p class="text-2xl font-black text-gray-800">
+                    {% if monthly_summary['income'] > 0 %}
                         {{ "%.1f"|format((monthly_summary['savings'] / monthly_summary['income']) * 100) }}%
-                    </span>
-                {% else %}
-                    <span class="badge badge-secondary">N/A</span>
-                {% endif %}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
             </div>
         </div>
     </div>
     {% endif %}
 
-    {% if monthly_expenses %}
-    <div class="card mb-4">
-        <div class="card-header bg-light">
-            <h5>Category Breakdown {% if selected_month %} - {{ selected_month }}{% endif %}</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-sm">
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Transactions</th>
-                        <th>Total Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for expense in monthly_expenses %}
-                        <tr>
-                            <td>{{ expense['category'] }}</td>
-                            <td><span class="badge badge-light">{{ expense['count'] }}</span></td>
-                            <td class="text-danger">₹ {{ "%.2f"|format(expense['total']) }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="3" class="text-center text-muted">No expenses in this period</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {% endif %}
-
-    <h5>Transactions {% if selected_month %} - {{ selected_month }}{% endif %}</h5>
-
-    {% if transactions_by_month %}
-        {% for month, txns in transactions_by_month.items() %}
-            <div class="card mb-3">
-                <div class="card-header bg-light">
-                    <strong>{{ month }}</strong>
-                    <span class="badge badge-secondary float-right">{{ txns|length }} transactions</span>
+    <!-- Transactions List -->
+    <div class="space-y-8">
+        {% if transactions_by_month %}
+            {% for month, txns in transactions_by_month.items() %}
+            <div class="bg-white rounded-3xl shadow-md border border-gray-100 overflow-hidden">
+                <!-- Month Header -->
+                <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                        <span class="bg-white text-gray-600 shadow-sm border border-gray-100 px-3 py-1 rounded-lg mr-3 text-sm">{{ month }}</span>
+                    </h3>
+                    <span class="text-sm font-semibold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{{ txns|length }} records</span>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-striped table-sm mb-0">
-                        <thead>
+                
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-600 min-w-[600px]">
+                        <thead class="text-xs text-gray-400 uppercase bg-white border-b border-gray-50">
                             <tr>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Category</th>
-                                <th>Amount</th>
-                                <th></th>
+                                <th scope="col" class="px-6 py-4 font-semibold tracking-wider w-1/3">Transaction</th>
+                                <th scope="col" class="px-6 py-4 font-semibold tracking-wider">Category</th>
+                                <th scope="col" class="px-6 py-4 font-semibold tracking-wider text-right">Amount</th>
+                                <th scope="col" class="px-6 py-4 font-semibold tracking-wider text-center">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-gray-100">
                             {% for txn in txns %}
-                                <tr>
-                                    <td>{{ txn['date'] }}</td>
-                                    <td>{{ txn['description'] }}</td>
-                                    <td>
-                                        <span class="badge badge-pill {% if txn['category'] == 'Income' %}badge-success{% else %}badge-warning{% endif %}">
-                                            {{ txn['category'] }}
-                                        </span>
-                                    </td>
-                                    <td class="{% if txn['amount'] < 0 %}text-danger font-weight-bold{% else %}text-success font-weight-bold{% endif %}">
-                                        ₹ {{ txn['amount'] }}
-                                    </td>
-                                    <td>
-                                        <a href="{{ url_for('transaction.delete', txn_id=txn['id']) }}" 
-                                           class="btn btn-sm btn-danger"
-                                           onclick="return confirm('Delete this transaction?');">
-                                           Delete
-                                        </a>
-                                    </td>
-                                </tr>
+                            <tr class="hover:bg-purple-50/30 transition-colors duration-200">
+                                <!-- Date removed here as it's been moved inside the description TD -->
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-2xl flex items-center justify-center mr-4 shadow-sm
+                                            {% if txn['amount'] > 0 %}bg-green-100 text-green-600{% else %}bg-pink-100 text-pink-600{% endif %}">
+                                            {% if txn['amount'] > 0 %}
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path></svg>
+                                            {% else %}
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"></path></svg>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-gray-900 text-base">{{ txn['description'] }}</p>
+                                            <p class="text-xs text-gray-500 mt-0.5">{{ txn['date'] }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="px-3 py-1.5 rounded-xl text-xs font-bold border {% if txn['amount'] > 0 %}bg-green-50 text-green-700 border-green-100{% else %}bg-purple-50 text-purple-700 border-purple-100{% endif %} whitespace-nowrap shadow-sm inline-flex items-center">
+                                        {% if txn['amount'] > 0 %}📈{% else %}📉{% endif %} <span class="ml-1.5">{{ txn['category'] }}</span>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right whitespace-nowrap">
+                                    {% if txn['amount'] >= 0 %}
+                                    <span class="text-green-600 font-bold bg-green-50/50 px-3 py-1.5 rounded-lg">+₹{{ txn['amount'] }}</span>
+                                    {% else %}
+                                    <span class="text-red-600 font-bold bg-red-50/50 px-3 py-1.5 rounded-lg">-₹{{ txn['amount'] | abs }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="{{ url_for('transaction.delete', txn_id=txn['id']) }}" onclick="return confirm('Are you sure you want to permanently delete this transaction?');" class="text-gray-400 hover:text-red-500 transition-colors bg-white hover:bg-red-50 border border-transparent hover:border-red-100 p-2 rounded-lg inline-flex" title="Delete">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </a>
+                                </td>
+                            </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
-        {% endfor %}
-    {% else %}
-        <div class="alert alert-info">
-            No transactions found.
+            {% endfor %}
+        {% else %}
+        <!-- Empty State -->
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 text-center">
+            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">No Transactions Found</h3>
+            <p class="text-gray-500 max-w-md mx-auto mb-6">You haven't recorded any financial activity in this period. Start tracking to see insights.</p>
+            <a href="{{ url_for('transaction.add_transaction_route') }}" class="bg-gray-900 text-white font-bold py-3 px-8 rounded-xl hover:bg-gray-800 transition-transform hover:-translate-y-1 shadow-lg inline-block">
+                Add Your First Transaction
+            </a>
         </div>
-    {% endif %}
+        {% endif %}
+    </div>
 
 </div>
 {% endblock %}

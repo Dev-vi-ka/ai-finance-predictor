@@ -43,9 +43,9 @@ def set_budget_route():
             return redirect(url_for('budget.set_budget_route'))
     
     current_month = date.today().strftime("%Y-%m")
+    # These must match the expense categories in add.html
     categories = [
-        "Food", "Transport", "Utilities", "Entertainment", "Healthcare",
-        "Shopping", "Dining", "Subscriptions", "Insurance", "Other"
+        "Food", "Travel", "Bills", "Shopping", "Medical", "Other"
     ]
     
     return render_template(
