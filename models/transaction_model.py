@@ -104,6 +104,23 @@ def get_monthly_expenses(user_id):
     return [{"month": row["month"], "total": row["total"]} for row in rows]
 
 
+def get_all_transaction_months(user_id):
+    """Return a list of all distinct YYYY-MM formatted string months that the user has transactions in."""
+    conn = get_db_connection()
+    
+    rows = conn.execute("""
+        SELECT DISTINCT strftime('%Y-%m', date) as month
+        FROM transactions
+        WHERE user_id = ?
+        ORDER BY month DESC
+    """, (user_id,)).fetchall()
+    
+    conn.close()
+    
+    return [row["month"] for row in rows]
+
+
+
 # -------- Get Transactions Grouped by Month --------
 def get_transactions_by_month(user_id, month=None):
     """Get all transactions for a user, optionally filtered by month (YYYY-MM format).
@@ -224,6 +241,10 @@ def calculate_health_score(user_id):
     """
     income, expenses, savings = get_financial_summary(user_id)
     
+    # If there is no financial activity, return 0 instead of base score
+    if income == 0 and expenses == 0:
+        return 0
+        
     score = 50  # Base score
     
     # Factor 1: Savings Ratio (0-30 points)

@@ -278,10 +278,7 @@ def live_monitoring_data():
 @require_admin()
 def analytics():
     """Advanced analytics and reporting."""
-    return render_template(
-        'analytics.html',
-        page_title='Advanced Analytics'
-    )
+    return render_template('analytics.html', page_title='Advanced Analytics')
 
 
 @admin_bp.route('/reports/export')

@@ -1,13 +1,13 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_file
 from models.transaction_model import (
     add_transaction, get_transactions_by_user, delete_transaction,
-    get_transactions_by_month, get_expense_by_month_and_category, get_monthly_summary
+    get_transactions_by_month, get_expense_by_month_and_category, get_monthly_summary,
+    get_all_transaction_months
 )
 from models.budget_model import (
     get_budget, get_budget_usage_percentage, get_category_spending, check_budget_threshold
 )
 from models.alert_model import create_alert, alert_exists_today
-from ml.category_classifier import predict_category
 from utils.auth_utils import validate_transaction_input, sanitize_string
 from datetime import date, datetime
 import csv
@@ -51,9 +51,13 @@ def handle_single_transaction(user_id):
         description = request.form['description']
         txn_type = request.form['type']   # income or expense
         txn_date = request.form['date']
+        user_cat = request.form.get('category', '').strip()
     except (ValueError, KeyError):
         flash("Invalid input", "danger")
         return redirect(url_for('transaction.add_transaction_route'))
+    
+    # Process optional Other category clarification
+    other_desc = request.form.get('other_category_desc', '').strip()
     
     # Validate input
     valid, errors = validate_transaction_input(description, amount, txn_type, txn_date)
@@ -66,13 +70,17 @@ def handle_single_transaction(user_id):
     description = sanitize_string(description, 255)
 
     if txn_type == 'expense':
-        category = predict_category(description)
-        is_auto_tagged = 1
+        category = user_cat if user_cat and user_cat != "Auto-predict (AI)" else "Other"
+        is_auto_tagged = 0
         amount = -abs(amount) # Store expenses as negative
     else:
-        category = "Income"
+        category = user_cat if user_cat and user_cat != "Auto-predict (AI)" else "Income"
         is_auto_tagged = 0
         amount = abs(amount) # Store income as positive
+        
+    # Append the optional specific description if "Other" or "Other Income" was selected
+    if (category == 'Other' or category == 'Other Income') and other_desc:
+        description = f"{description} ({sanitize_string(other_desc, 50)})"
 
     try:
         add_transaction(
@@ -196,13 +204,16 @@ def handle_bulk_upload(user_id):
                 # Sanitize description
                 description = sanitize_string(description, 255)
                 
+                # Check if category is specified in CSV
+                csv_cat = str(txn.get('Category', '')).strip()
+                
                 # Auto-tag category for expenses
                 if txn_type == 'expense':
-                    category = predict_category(description)
-                    is_auto_tagged = 1
+                    category = csv_cat if csv_cat and csv_cat != "Auto-predict (AI)" else "Other"
+                    is_auto_tagged = 0
                     amount = -abs(amount)  # Store as negative
                 else:
-                    category = 'Income'
+                    category = csv_cat if csv_cat else 'Income'
                     is_auto_tagged = 0
                     amount = abs(amount)  # Store as positive
                 
@@ -244,11 +255,11 @@ def history():
     user_id = session['user_id']
     selected_month = request.args.get('month', None)
     
-    # Get transactions grouped by month
+    # Get transactions grouped by month (filtered if selected_month is set)
     transactions_by_month = get_transactions_by_month(user_id, selected_month)
     
     # Get list of all available months for filter dropdown
-    all_months = list(transactions_by_month.keys()) if not selected_month else None
+    all_months = get_all_transaction_months(user_id)
     
     # Get monthly expense breakdown by category
     monthly_expenses = get_expense_by_month_and_category(user_id, selected_month)
@@ -328,21 +339,35 @@ def parse_excel_file(file):
 # -------- Download CSV Template --------
 @transaction_bp.route('/transactions/download-template')
 def download_template():
-    """Download a sample CSV template for bulk transaction upload."""
+    """Download a sample CSV/Excel template for bulk transaction upload."""
     
+    import os
+    from flask import send_from_directory
+    
+    # Path where we generated the excel file
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    file_path = os.path.join(root_dir, 'transaction_template.xlsx')
+    
+    if os.path.exists(file_path):
+        return send_file(
+            file_path,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name='transaction_template.xlsx'
+        )
+    
+    # Fallback to CSV if somehow excel doesn't exist
     # Create CSV data
     csv_data = io.StringIO()
     writer = csv.writer(csv_data)
     
     # Write header
-    writer.writerow(['Date', 'Description', 'Amount', 'Type'])
+    writer.writerow(['Date', 'Description', 'Amount', 'Type', 'Category'])
     
     # Write sample rows
-    writer.writerow(['2026-03-01', 'Grocery shopping', '45.50', 'expense'])
-    writer.writerow(['2026-03-02', 'Monthly salary', '5000.00', 'income'])
-    writer.writerow(['2026-03-03', 'Fuel for car', '60.00', 'expense'])
-    writer.writerow(['2026-03-04', 'Restaurant dinner', '120.25', 'expense'])
-    writer.writerow(['2026-03-05', 'Movie tickets', '25.00', 'expense'])
+    writer.writerow(['2026-03-01', 'Grocery shopping', '45.50', 'expense', 'Food'])
+    writer.writerow(['2026-03-02', 'Monthly salary', '5000.00', 'income', 'Salary'])
+    writer.writerow(['2026-03-03', 'Fuel for car', '60.00', 'expense', 'Travel'])
     
     # Create BytesIO and send
     csv_bytes = io.BytesIO(csv_data.getvalue().encode('utf-8'))

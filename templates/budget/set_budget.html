@@ -3,83 +3,78 @@
 {% block title %}Set Monthly Budget{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">💰 Set Monthly Budget</h4>
-                </div>
-                <div class="card-body">
-                    <form method="POST">
-                        <div class="form-group mb-3">
-                            <label for="category" class="form-label">Category</label>
-                            <select class="form-select" id="category" name="category" required>
-                                <option value="">Select a category...</option>
-                                {% for cat in categories %}
-                                <option value="{{ cat }}">{{ cat }}</option>
-                                {% endfor %}
-                            </select>
-                            <small class="text-muted">Select the expense category for this budget</small>
-                        </div>
+<div class="py-6 max-w-2xl mx-auto space-y-6">
 
-                        <div class="form-group mb-3">
-                            <label for="limit_amount" class="form-label">Monthly Limit ($)</label>
-                            <input type="number" class="form-control" id="limit_amount" name="limit_amount"
-                                   placeholder="e.g., 500" step="0.01" min="0" required>
-                            <small class="text-muted">Set your monthly spending limit for this category</small>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label for="month" class="form-label">Month</label>
-                            <input type="month" class="form-control" id="month" name="month"
-                                   value="{{ current_month }}" required>
-                            <small class="text-muted">Leave as current month or select a different one</small>
-                        </div>
-
-                        <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
-                            <a href="{{ url_for('budget.view_budgets') }}" class="btn btn-secondary">
-                                ← Back to Budgets
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                Save Budget
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Budget Tips -->
-            <div class="card mt-4 bg-light">
-                <div class="card-header">
-                    <h5 class="mb-0">💡 Budget Tips</h5>
-                </div>
-                <div class="card-body small">
-                    <ul>
-                        <li>Set realistic budgets based on your spending patterns</li>
-                        <li>Review and adjust your budgets monthly</li>
-                        <li>You'll receive alerts when you reach 80%, 90%, and 100% of your budget</li>
-                        <li>Track spending trends to identify areas to cut back</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <!-- Header -->
+    <div>
+        <h1 class="text-3xl font-black text-gray-800 flex items-center">
+            <span class="bg-green-100 text-green-600 p-2 rounded-xl mr-3 h-10 w-10 flex items-center justify-center">💰</span>
+            Set Monthly Budget
+        </h1>
+        <p class="text-gray-500 font-medium mt-1 ml-14">Define spending limits per category</p>
     </div>
-</div>
 
-<style>
-    .form-select, .form-control {
-        border-radius: 0.5rem;
-    }
-    
-    .card {
-        border: none;
-        border-radius: 0.75rem;
-    }
-    
-    .card-header {
-        border-radius: 0.75rem 0.75rem 0 0;
-        border: none;
-    }
-</style>
+    <!-- Form Card -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 space-y-6">
+        <form method="POST" class="space-y-6">
+
+            <!-- Category -->
+            <div class="space-y-2">
+                <label for="category" class="text-sm font-bold text-gray-700 uppercase tracking-wider">Category</label>
+                <select class="w-full bg-gray-50 border border-gray-200 text-gray-800 font-semibold rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none cursor-pointer transition-all" id="category" name="category" required>
+                    <option value="">Select a category...</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                    {% endfor %}
+                </select>
+                <p class="text-xs text-gray-400 font-medium">Select the expense category to set a budget for</p>
+            </div>
+
+            <!-- Monthly Limit -->
+            <div class="space-y-2">
+                <label for="limit_amount" class="text-sm font-bold text-gray-700 uppercase tracking-wider">Monthly Limit (₹)</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">₹</span>
+                    <input type="number" class="w-full bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl pl-9 pr-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all" id="limit_amount" name="limit_amount"
+                           placeholder="e.g. 5000" step="0.01" min="0" required>
+                </div>
+                <p class="text-xs text-gray-400 font-medium">Your maximum spending limit for this category</p>
+            </div>
+
+            <!-- Month -->
+            <div class="space-y-2">
+                <label for="month" class="text-sm font-bold text-gray-700 uppercase tracking-wider">Month</label>
+                <input type="month" class="w-full bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all cursor-pointer" id="month" name="month"
+                       value="{{ current_month }}" required>
+                <p class="text-xs text-gray-400 font-medium">Budget applies to this month's transactions</p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <a href="{{ url_for('budget.view_budgets') }}"
+                    class="flex-1 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-3 rounded-xl transition-all text-center">
+                    ← Back to Budgets
+                </a>
+                <button type="submit"
+                    class="flex-1 bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 rounded-xl shadow-md transition-all hover:-translate-y-0.5">
+                    💾 Save Budget
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tips Card -->
+    <div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-6">
+        <h3 class="text-lg font-bold text-indigo-900 mb-4 flex items-center">
+            <span class="bg-indigo-200 text-indigo-700 p-1.5 rounded-lg mr-2">💡</span> Budget Tips
+        </h3>
+        <ul class="space-y-2 text-sm text-indigo-800">
+            <li class="flex items-start gap-2"><span class="mt-0.5">•</span> Set realistic budgets based on your past spending patterns</li>
+            <li class="flex items-start gap-2"><span class="mt-0.5">•</span> Review and adjust your budgets monthly</li>
+            <li class="flex items-start gap-2"><span class="mt-0.5">•</span> You'll receive alerts at 80%, 90%, and 100% of your budget</li>
+            <li class="flex items-start gap-2"><span class="mt-0.5">•</span> Track spending trends to identify areas to cut back</li>
+        </ul>
+    </div>
+
+</div>
 {% endblock %}
