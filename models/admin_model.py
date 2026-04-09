@@ -267,146 +267,113 @@ def get_spending_spikes_analysis(threshold_percentile=75):
 
 def get_model_performance_summary():
     """Get latest ML model performance metrics."""
-    conn = get_db_connection()
-    
-    metrics = conn.execute("""
-        SELECT 
-            metric_type,
-            value,
-            metadata,
-            created_at
-        FROM ml_model_metrics
-        ORDER BY created_at DESC
-        LIMIT 4
-    """).fetchall()
-    
-    conn.close()
-    return [dict(row) for row in metrics] if metrics else []
+    try:
+        conn = get_db_connection()
+        metrics = conn.execute("""
+            SELECT metric_type, value, metadata, created_at
+            FROM ml_model_metrics ORDER BY created_at DESC LIMIT 4
+        """).fetchall()
+        conn.close()
+        return [dict(row) for row in metrics] if metrics else []
+    except Exception:
+        return []
 
 
 def calculate_categorization_accuracy():
     """Calculate model categorization accuracy based on auto-tagged vs corrected."""
-    conn = get_db_connection()
-    
-    total_auto_tagged = conn.execute("""
-        SELECT COUNT(*) as count FROM transactions WHERE is_auto_tagged = 1
-    """).fetchone()['count']
-    
-    corrections = conn.execute("""
-        SELECT COUNT(*) as count FROM model_corrections
-    """).fetchone()['count']
-    
-    conn.close()
-    
-    if total_auto_tagged == 0:
+    try:
+        conn = get_db_connection()
+        total_auto_tagged = conn.execute("""
+            SELECT COUNT(*) as count FROM transactions WHERE is_auto_tagged = 1
+        """).fetchone()['count']
+        corrections = conn.execute("""
+            SELECT COUNT(*) as count FROM model_corrections
+        """).fetchone()['count']
+        conn.close()
+        if total_auto_tagged == 0:
+            return 0
+        accuracy = ((total_auto_tagged - corrections) / total_auto_tagged) * 100
+        return round(accuracy, 2)
+    except Exception:
         return 0
-    
-    accuracy = ((total_auto_tagged - corrections) / total_auto_tagged) * 100
-    return round(accuracy, 2)
 
 
 def calculate_user_correction_rate():
     """Calculate the percentage of auto-tagged transactions that users corrected."""
-    conn = get_db_connection()
-    
-    total_auto_tagged = conn.execute("""
-        SELECT COUNT(*) as count FROM transactions WHERE is_auto_tagged = 1
-    """).fetchone()['count']
-    
-    corrections = conn.execute("""
-        SELECT COUNT(*) as count FROM model_corrections
-    """).fetchone()['count']
-    
-    conn.close()
-    
-    if total_auto_tagged == 0:
+    try:
+        conn = get_db_connection()
+        total_auto_tagged = conn.execute("""
+            SELECT COUNT(*) as count FROM transactions WHERE is_auto_tagged = 1
+        """).fetchone()['count']
+        corrections = conn.execute("""
+            SELECT COUNT(*) as count FROM model_corrections
+        """).fetchone()['count']
+        conn.close()
+        if total_auto_tagged == 0:
+            return 0
+        correction_rate = (corrections / total_auto_tagged) * 100
+        return round(correction_rate, 2)
+    except Exception:
         return 0
-    
-    correction_rate = (corrections / total_auto_tagged) * 100
-    return round(correction_rate, 2)
 
 
 def get_model_prediction_errors():
     """Get prediction error metrics by category."""
-    conn = get_db_connection()
-    
-    errors = conn.execute("""
-        SELECT 
-            original_category,
-            corrected_category,
-            COUNT(*) as error_count
-        FROM model_corrections
-        GROUP BY original_category, corrected_category
-        ORDER BY error_count DESC
-        LIMIT 15
-    """).fetchall()
-    
-    conn.close()
-    return [dict(row) for row in errors] if errors else []
+    try:
+        conn = get_db_connection()
+        errors = conn.execute("""
+            SELECT original_category, corrected_category, COUNT(*) as error_count
+            FROM model_corrections
+            GROUP BY original_category, corrected_category
+            ORDER BY error_count DESC LIMIT 15
+        """).fetchall()
+        conn.close()
+        return [dict(row) for row in errors] if errors else []
+    except Exception:
+        return []
 
 
 def detect_model_drift(lookback_days=30):
     """Detect model drift by comparing recent vs historical performance."""
-    conn = get_db_connection()
-    
-    cutoff_date = (datetime.now() - timedelta(days=lookback_days)).strftime('%Y-%m-%d')
-    
-    # Recent corrections
-    recent = conn.execute("""
-        SELECT COUNT(*) as count FROM model_corrections
-        WHERE created_at >= ?
-    """, (cutoff_date,)).fetchone()['count']
-    
-    # Recent auto-tagged
-    recent_auto_tagged = conn.execute("""
-        SELECT COUNT(*) as count FROM transactions
-        WHERE is_auto_tagged = 1 AND created_at >= ?
-    """, (cutoff_date,)).fetchone()['count']
-    
-    # Historical corrections
-    historical = conn.execute("""
-        SELECT COUNT(*) as count FROM model_corrections
-    """).fetchone()['count']
-    
-    # Historical auto-tagged
-    historical_auto_tagged = conn.execute("""
-        SELECT COUNT(*) as count FROM transactions
-        WHERE is_auto_tagged = 1
-    """).fetchone()['count']
-    
-    conn.close()
-    
-    recent_error_rate = (recent / recent_auto_tagged * 100) if recent_auto_tagged > 0 else 0
-    historical_error_rate = (historical / historical_auto_tagged * 100) if historical_auto_tagged > 0 else 0
-    
-    drift = round(recent_error_rate - historical_error_rate, 2)
-    drift_status = 'concerning' if drift > 5 else 'stable' if drift > -5 else 'improving'
-    
-    return {
-        'recent_error_rate': round(recent_error_rate, 2),
-        'historical_error_rate': round(historical_error_rate, 2),
-        'drift_value': drift,
-        'drift_status': drift_status,
-        'lookback_days': lookback_days
-    }
+    try:
+        conn = get_db_connection()
+        cutoff_date = (datetime.now() - timedelta(days=lookback_days)).strftime('%Y-%m-%d')
+        recent = conn.execute("""
+            SELECT COUNT(*) as count FROM model_corrections WHERE created_at >= ?
+        """, (cutoff_date,)).fetchone()['count']
+        recent_auto_tagged = conn.execute("""
+            SELECT COUNT(*) as count FROM transactions WHERE is_auto_tagged = 1 AND date >= ?
+        """, (cutoff_date,)).fetchone()['count']
+        historical = conn.execute("SELECT COUNT(*) as count FROM model_corrections").fetchone()['count']
+        historical_auto_tagged = conn.execute("""
+            SELECT COUNT(*) as count FROM transactions WHERE is_auto_tagged = 1
+        """).fetchone()['count']
+        conn.close()
+        recent_error_rate = (recent / recent_auto_tagged * 100) if recent_auto_tagged > 0 else 0
+        historical_error_rate = (historical / historical_auto_tagged * 100) if historical_auto_tagged > 0 else 0
+        drift = round(recent_error_rate - historical_error_rate, 2)
+        drift_status = 'concerning' if drift > 5 else 'stable' if drift > -5 else 'improving'
+        return {'recent_error_rate': round(recent_error_rate, 2), 'historical_error_rate': round(historical_error_rate, 2),
+                'drift_value': drift, 'drift_status': drift_status, 'lookback_days': lookback_days}
+    except Exception:
+        return {'recent_error_rate': 0, 'historical_error_rate': 0, 'drift_value': 0, 'drift_status': 'stable', 'lookback_days': lookback_days}
 
 
 def get_most_misclassified_categories():
     """Get categories that are most frequently misclassified."""
-    conn = get_db_connection()
-    
-    misclassified = conn.execute("""
-        SELECT 
-            original_category as category,
-            COUNT(*) as error_count,
-            ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM model_corrections), 2) as error_percentage
-        FROM model_corrections
-        GROUP BY original_category
-        ORDER BY error_count DESC
-    """).fetchall()
-    
-    conn.close()
-    return [dict(row) for row in misclassified] if misclassified else []
+    try:
+        conn = get_db_connection()
+        misclassified = conn.execute("""
+            SELECT original_category as category, COUNT(*) as error_count,
+                ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM model_corrections), 2) as error_percentage
+            FROM model_corrections
+            GROUP BY original_category
+            ORDER BY error_count DESC
+        """).fetchall()
+        conn.close()
+        return [dict(row) for row in misclassified] if misclassified else []
+    except Exception:
+        return []
 
 
 # ============================================

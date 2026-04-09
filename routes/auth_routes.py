@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from werkzeug.security import generate_password_hash, check_password_hash
 from models.user_model import create_user, get_user_by_email
 from utils.auth_utils import validate_user_registration, sanitize_string
+from config import ADMIN_EMAILS
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -21,12 +22,12 @@ def register():
         if not valid:
             for error in errors:
                 flash(error, "danger")
-            return redirect(url_for('auth.register'))
+            return render_template('auth/register.html', name=name, email=email)
 
         # Check if email already registered
         if get_user_by_email(email):
             flash("Email already registered", "danger")
-            return redirect(url_for('auth.register'))
+            return render_template('auth/register.html', name=name, email=email)
 
         try:
             # Sanitize name
@@ -38,7 +39,7 @@ def register():
             return redirect(url_for('auth.login'))
         except Exception as e:
             flash(f"Registration error: {str(e)}", "danger")
-            return redirect(url_for('auth.register'))
+            return render_template('auth/register.html', name=name, email=email)
 
     return render_template('auth/register.html')
 
@@ -60,6 +61,8 @@ def login():
         if user and check_password_hash(user['password_hash'], password):
             session['user_id'] = user['id']
             session['user_name'] = user['name']
+            session['user_email'] = email
+            session['is_admin'] = email in ADMIN_EMAILS
 
             flash("Login successful", "success")
             return redirect(url_for('dashboard.index'))

@@ -1,182 +1,237 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-5" style="max-width:800px;">
-    <h2 class="mb-4">➕ Add Transactions</h2>
+<div class="py-6 space-y-8 max-w-4xl mx-auto">
 
-    <!-- Tabs Navigation -->
-    <ul class="nav nav-tabs mb-4" id="transactionTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="single-tab" data-bs-toggle="tab" data-bs-target="#single-pane" type="button" role="tab" aria-controls="single-pane" aria-selected="true">
-                ➕ Add Single
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="bulk-tab" data-bs-toggle="tab" data-bs-target="#bulk-pane" type="button" role="tab" aria-controls="bulk-pane" aria-selected="false">
-                📤 Bulk Upload (CSV/Excel)
-            </button>
-        </li>
-    </ul>
-
-    <!-- Tab Content -->
-    <div class="tab-content" id="transactionTabContent">
-        
-        <!-- Single Transaction Tab -->
-        <div class="tab-pane fade show active" id="single-pane" role="tabpanel" aria-labelledby="single-tab">
-            <div class="card">
-                <div class="card-body">
-                    <form method="POST" id="singleTransactionForm">
-                        <input type="hidden" name="bulk_upload" value="false">
-
-                        <div class="mb-3">
-                            <label for="type" class="form-label">Type</label>
-                            <select name="type" id="type" class="form-control">
-                                <option value="expense">Expense</option>
-                                <option value="income">Income</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="amount" class="form-label">Amount</label>
-                            <input type="number" step="0.01" name="amount" id="amount" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <input type="text" name="description" id="description" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="category" class="form-label">Category</label>
-                            <select name="category" id="category" class="form-control">
-                                <option>Food</option>
-                                <option>Travel</option>
-                                <option>Bills</option>
-                                <option>Shopping</option>
-                                <option>Medical</option>
-                                <option>Other</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="date" class="form-label">Date</label>
-                            <input type="date" name="date" id="date" value="{{ today }}" class="form-control">
-                        </div>
-
-                        <button type="submit" class="btn btn-success w-100">💾 Save Transaction</button>
-                    </form>
-                </div>
-            </div>
+    <!-- Header -->
+    <div class="relative bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-center justify-between text-white shadow-xl overflow-hidden">
+        <div class="relative z-10 text-center md:text-left">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 flex items-center justify-center md:justify-start">
+                <span class="bg-white/20 p-2 rounded-xl mr-3 shadow-inner">✍️</span> Add Transactions
+            </h1>
+            <p class="text-indigo-100 text-lg opacity-90 max-w-lg">Track your income and expenses effortlessly.</p>
         </div>
+        <!-- Abstract Shapes -->
+        <div class="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-white opacity-10 rounded-full blur-3xl mix-blend-overlay"></div>
+        <div class="absolute bottom-0 left-10 w-48 h-48 bg-purple-300 opacity-20 rounded-full blur-2xl mix-blend-overlay"></div>
+    </div>
 
-        <!-- Bulk Upload Tab -->
-        <div class="tab-pane fade" id="bulk-pane" role="tabpanel" aria-labelledby="bulk-tab">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">📋 Upload Instructions</h5>
+    <!-- Tabs Navigation Custom -->
+    <div class="bg-white rounded-2xl p-2 shadow-sm border border-gray-100 flex gap-2 w-full md:w-3/4 mx-auto">
+        <button id="tab-single" onclick="switchTab('single')" class="flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all bg-indigo-50 text-indigo-700 shadow-sm">
+            ➕ Add Single
+        </button>
+        <button id="tab-bulk" onclick="switchTab('bulk')" class="flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all text-gray-500 hover:bg-gray-50">
+            📤 Bulk Upload
+        </button>
+    </div>
+
+    <!-- Single Add Form -->
+    <div id="pane-single" class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden transition-all">
+        <div class="p-8 md:p-10">
+            <form method="POST" id="singleTransactionForm" class="space-y-6">
+                <input type="hidden" name="bulk_upload" value="false">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="type" class="text-sm font-bold text-gray-700 uppercase tracking-wider">Type</label>
+                        <select name="type" id="type" class="w-full bg-gray-50 border border-gray-200 text-gray-800 font-semibold rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none cursor-pointer transition-all">
+                            <option value="expense">📉 Expense</option>
+                            <option value="income">📈 Income</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="amount" class="text-sm font-bold text-gray-700 uppercase tracking-wider">Amount (₹)</label>
+                        <input type="number" step="0.01" name="amount" id="amount" class="w-full bg-white border border-gray-200 text-gray-900 font-bold rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all placeholder-gray-400" placeholder="0.00" required>
+                    </div>
                 </div>
-                <div class="card-body">
+
+                <div class="space-y-2">
+                    <label for="description" class="text-sm font-bold text-gray-700 uppercase tracking-wider">Description</label>
+                    <input type="text" name="description" id="description" class="w-full bg-white border border-gray-200 text-gray-900 font-semibold rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all placeholder-gray-400" placeholder="e.g. Morning Coffee" required>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="category" class="text-sm font-bold text-gray-700 uppercase tracking-wider">Category</label>
+                        <select name="category" id="category" class="w-full bg-gray-50 border border-gray-200 text-gray-800 font-semibold rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none cursor-pointer transition-all">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+
+                    <div class="space-y-2 hidden transition-all duration-300 transform scale-95 opacity-0" id="otherCategoryDiv">
+                        <label for="other_category_desc" class="text-sm font-bold text-indigo-700 uppercase tracking-wider flex justify-between">
+                            <span>Specify 'Other' Category</span>
+                            <span class="text-xs text-indigo-400 font-normal">Optional</span>
+                        </label>
+                        <input type="text" name="other_category_desc" id="other_category_desc" placeholder="E.g., Pet supplies, Charity, etc." class="w-full bg-indigo-50 border border-indigo-200 text-gray-900 font-semibold rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all placeholder-indigo-300">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="date" class="text-sm font-bold text-gray-700 uppercase tracking-wider">Date</label>
+                        <input type="date" name="date" id="date" value="{{ today }}" class="w-full bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all cursor-pointer">
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-gray-900 hover:bg-gray-800 text-white font-bold text-lg py-4 rounded-xl shadow-md transition-all transform hover:-translate-y-1">
+                        💾 Save Transaction
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bulk Upload Form -->
+    <div id="pane-bulk" class="hidden bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden transition-all">
+        <div class="p-8 md:p-10 space-y-8">
+            
+            <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-indigo-900 mb-4 flex items-center">
+                    <span class="bg-indigo-200 text-indigo-700 p-1.5 rounded-lg mr-2">📋</span> Upload Instructions
+                </h3>
+                <div class="text-sm text-indigo-800 space-y-4">
                     <p>Upload a CSV or Excel file to add multiple transactions at once.</p>
-                    
-                    <h6 class="mt-3">Required Fields:</h6>
-                    <ul>
-                        <li><strong>Date</strong> - Transaction date (format: YYYY-MM-DD, e.g., 2026-03-04)</li>
-                        <li><strong>Description</strong> - Brief description of the transaction</li>
-                        <li><strong>Amount</strong> - Transaction amount (numeric value, e.g., 100.50)</li>
-                    </ul>
-                    
-                    <h6 class="mt-3">Optional Fields:</h6>
-                    <ul>
-                        <li><strong>Type</strong> - "expense" or "income" (default: "expense")</li>
-                    </ul>
-
-                    <h6 class="mt-3">Supported Formats:</h6>
-                    <ul>
-                        <li>CSV (.csv)</li>
-                        <li>Excel (.xlsx, .xls)</li>
-                    </ul>
-
-                    <div class="alert alert-light border mt-3 mb-3">
-                        <strong>Example CSV Format:</strong>
-                        <pre style="margin: 0; font-size: 0.85rem; overflow-x: auto;"><code>Date,Description,Amount,Type
-2026-03-01,Grocery shopping,45.50,expense
-2026-03-02,Monthly salary,5000.00,income
-2026-03-03,Fuel for car,60.00,expense</code></pre>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="font-bold mb-1">Required Fields:</p>
+                            <ul class="list-disc list-inside opacity-90 space-y-1">
+                                <li><strong>Date</strong> (YYYY-MM-DD)</li>
+                                <li><strong>Description</strong></li>
+                                <li><strong>Amount</strong> (numeric)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <p class="font-bold mb-1">Optional Fields:</p>
+                            <ul class="list-disc list-inside opacity-90 space-y-1">
+                                <li><strong>Type</strong> ("expense" / "income")</li>
+                                <li><strong>Category</strong></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card mt-3">
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data" id="bulkUploadForm">
-                        <input type="hidden" name="bulk_upload" value="true">
-
-                        <div class="mb-3">
-                            <label for="csvFile" class="form-label">Choose CSV or Excel file:</label>
-                            <input 
-                                type="file" 
-                                class="form-control" 
-                                id="csvFile" 
-                                name="file" 
-                                accept=".csv,.xlsx,.xls"
-                                required
-                            />
-                            <small class="form-text text-muted">
-                                Maximum file size: 10MB. Accepted formats: CSV, XLSX, XLS
-                            </small>
+            <form method="POST" enctype="multipart/form-data" id="bulkUploadForm" class="space-y-6">
+                <input type="hidden" name="bulk_upload" value="true">
+                
+                <div class="relative border-2 border-dashed border-gray-300 rounded-2xl p-10 text-center hover:border-purple-500 hover:bg-purple-50 transition-colors group cursor-pointer" id="drop-area">
+                    <input type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" id="csvFile" name="file" accept=".csv,.xlsx,.xls" required>
+                    <div class="space-y-2">
+                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm text-gray-400 group-hover:text-purple-500 group-hover:scale-110 transition-all">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                         </div>
-
-                        <div class="mb-3">
-                            <div id="filePreview" class="alert alert-light p-3" style="display:none;">
-                                <p class="mb-1"><strong>File Name:</strong> <span id="previewName"></span></p>
-                                <p class="mb-0"><strong>File Size:</strong> <span id="previewSize"></span></p>
-                            </div>
-                        </div>
-
-                        <div class="alert alert-warning">
-                            <h6 class="alert-heading">⚠️ Before you upload:</h6>
-                            <ul class="mb-0">
-                                <li>Ensure all rows have Date, Description, and Amount</li>
-                                <li>Use format YYYY-MM-DD for dates</li>
-                                <li>Amounts should be numeric</li>
-                                <li>Type should be "expense" or "income"</li>
-                            </ul>
-                        </div>
-
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success btn-lg flex-grow-1">
-                                ✅ Upload & Process
-                            </button>
-                            <button type="reset" class="btn btn-secondary">
-                                🔄 Clear
-                            </button>
-                        </div>
-                    </form>
+                        <p class="text-gray-700 font-bold">Click to upload or drag and drop</p>
+                        <p class="text-sm text-gray-500">CSV, XLSX, XLS (Max: 10MB)</p>
+                    </div>
                 </div>
-            </div>
 
-            <div class="mt-3">
-                <a href="{{ url_for('transaction.download_template') }}" class="btn btn-outline-primary w-100">
-                    ⬇️ Download CSV Template
-                </a>
-            </div>
+                <div id="filePreview" class="hidden bg-purple-50 border border-purple-100 rounded-xl p-4 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">📄</span>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900" id="previewName">filename.csv</p>
+                            <p class="text-xs text-gray-500 font-semibold" id="previewSize">0 KB</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 pt-2">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white font-bold text-lg py-4 rounded-xl shadow-md transition-all transform hover:-translate-y-1">
+                        ✅ Upload & Process
+                    </button>
+                    <a href="{{ url_for('transaction.download_template') }}" class="flex-1 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold text-lg py-4 rounded-xl shadow-sm transition-all text-center flex items-center justify-center">
+                        ⬇️ Get Template
+                    </a>
+                </div>
+            </form>
         </div>
-
     </div>
-
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Show file preview when file is selected
+    function switchTab(tab) {
+        const btnSingle = document.getElementById('tab-single');
+        const btnBulk = document.getElementById('tab-bulk');
+        const paneSingle = document.getElementById('pane-single');
+        const paneBulk = document.getElementById('pane-bulk');
+
+        // Reset
+        btnSingle.className = 'flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all text-gray-500 hover:bg-gray-50';
+        btnBulk.className = 'flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all text-gray-500 hover:bg-gray-50';
+        paneSingle.classList.add('hidden');
+        paneBulk.classList.add('hidden');
+
+        if (tab === 'single') {
+            btnSingle.className = 'flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all bg-indigo-50 text-indigo-700 shadow-sm';
+            paneSingle.classList.remove('hidden');
+        } else {
+            btnBulk.className = 'flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all bg-indigo-50 text-indigo-700 shadow-sm';
+            paneBulk.classList.remove('hidden');
+        }
+    }
+
     document.getElementById('csvFile').addEventListener('change', function() {
         const file = this.files[0];
         if (file) {
             document.getElementById('previewName').textContent = file.name;
             document.getElementById('previewSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
-            document.getElementById('filePreview').style.display = 'block';
+            document.getElementById('filePreview').classList.remove('hidden');
         }
     });
 </script>
+<script>
+    const typeSelect = document.getElementById('type');
+    const categorySelect = document.getElementById('category');
+    const otherCategoryDiv = document.getElementById('otherCategoryDiv');
+    const otherCategoryInput = document.getElementById('other_category_desc');
 
+    const expenseCategories = ['Food', 'Travel', 'Bills', 'Shopping', 'Medical', 'Other'];
+    const incomeCategories = ['Salary', 'Freelance', 'Investment', 'Business', 'Gift', 'Other Income'];
+
+    function checkOtherCategory() {
+        const selected = categorySelect.value;
+        if (selected === 'Other' || selected === 'Other Income') {
+            // Show the explanation field with a fun animation
+            otherCategoryDiv.classList.remove('hidden');
+            setTimeout(() => {
+                otherCategoryDiv.classList.remove('scale-95', 'opacity-0');
+                otherCategoryDiv.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            otherCategoryInput.focus();
+        } else {
+            // Hide the explanation field
+            otherCategoryDiv.classList.remove('scale-100', 'opacity-100');
+            otherCategoryDiv.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                otherCategoryDiv.classList.add('hidden');
+                otherCategoryInput.value = ''; // clear out optional text
+            }, 300);
+        }
+    }
+
+    function updateCategories() {
+        const type = typeSelect.value;
+        const categories = type === 'income' ? incomeCategories : expenseCategories;
+        
+        categorySelect.innerHTML = '';
+        categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            categorySelect.appendChild(option);
+        });
+        
+        // Check standard category
+        checkOtherCategory();
+    }
+
+    // Initialize on load
+    updateCategories();
+
+    // Listen to changes
+    typeSelect.addEventListener('change', updateCategories);
+    categorySelect.addEventListener('change', checkOtherCategory);
+</script>
 {% endblock %}

@@ -1,5 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
-    fetchPrediction();
+    // Only run on pages that have the prediction chart canvas
+    if (document.getElementById('predictionChart')) {
+        fetchPrediction();
+    }
 });
 
 function fetchPrediction() {
@@ -14,6 +17,8 @@ function fetchPrediction() {
 
 function updatePredictionText(data) {
     const textElement = document.getElementById('predictionText');
+    if (!textElement) return;
+
     if (data.predicted_amount > 0) {
         textElement.innerHTML = `Forecast for <strong>${data.prediction_month}</strong>: <span class="text-primary">₹${data.predicted_amount}</span>`;
     } else {
@@ -22,7 +27,11 @@ function updatePredictionText(data) {
 }
 
 function renderPredictionChart(data) {
-    const ctx = document.getElementById('predictionChart').getContext('2d');
+    const canvas = document.getElementById('predictionChart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
     const labels = data.labels;
     const actuals = data.actuals;

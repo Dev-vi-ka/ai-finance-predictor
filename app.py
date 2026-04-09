@@ -26,6 +26,7 @@ def create_app():
     
     app = Flask(__name__)
     app.secret_key = SECRET_KEY
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
 
     # Register custom Jinja2 filters
     from datetime import datetime

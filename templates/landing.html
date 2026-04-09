@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,200 +16,332 @@
 
 <body class="font-sans text-white overflow-x-hidden">
 
-<!-- ================= LANDING WRAPPER ================= -->
-<div class="min-h-screen flex flex-col bg-gradient-to-b from-purple-700 via-pink-600 to-pink-400 relative">
+    <!-- ================= LANDING WRAPPER ================= -->
+    <div class="min-h-screen flex flex-col bg-gradient-to-b from-purple-700 via-pink-600 to-pink-400 relative">
 
-    <!-- ================= NAVBAR ================= -->
-    <nav class="px-6 md:px-16 py-6">
-        <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto">
+        <!-- ================= NAVBAR ================= -->
+        <nav class="px-6 md:px-16 py-6">
+            <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto">
 
-            <!-- Logo -->
-            <div class="flex items-center space-x-4">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" class="h-12" alt="Spendora Logo">
-                <div>
-                    <h2 class="text-lg font-semibold tracking-wide">SPENDORA</h2>
-                    <p class="text-xs tracking-widest opacity-90">AI FINANCE PREDICTOR</p>
+                <!-- Logo -->
+                <div class="flex items-center space-x-4">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" class="h-12" alt="Spendora Logo">
+                    <div>
+                        <h2 class="text-lg font-semibold tracking-wide">SPENDORA</h2>
+                        <p class="text-xs tracking-widest opacity-90">AI FINANCE PREDICTOR</p>
+                    </div>
                 </div>
+
+                <!-- Nav Links -->
+                <div class="hidden md:flex space-x-10 text-sm tracking-wide">
+                    <a href="#features" class="hover:opacity-100 opacity-80 transition">FEATURES</a>
+                    <a href="#how-it-works" class="hover:opacity-100 opacity-80 transition">HOW IT WORKS</a>
+                    <a href="#join" class="hover:opacity-100 opacity-80 transition">JOIN</a>
+                </div>
+
+                <!-- Signup Button -->
+                <a href="{{ url_for('auth.register') }}"
+                    class="hidden md:inline-block bg-yellow-400 text-gray-900 font-semibold px-6 py-2 rounded-full hover:bg-yellow-300 transition transform hover:-translate-y-1 shadow-lg">
+                    SIGN UP
+                </a>
+
+            </div>
+        </nav>
+
+        <!-- ================= HERO ================= -->
+        <section class="flex-1 flex flex-col items-center justify-center text-center px-6 md:px-20 pt-8 relative z-10">
+
+            <h1 class="text-4xl md:text-6xl font-light tracking-widest mb-6 drop-shadow-lg">
+                Spendora
+            </h1>
+
+            <p class="max-w-2xl text-base md:text-lg leading-relaxed opacity-95 mb-10">
+                <strong>Smarter Budgeting. Predictive Spending. Complete Control.</strong><br>
+                Track your expenses, understand where your money goes, and predict future spending with AI-powered
+                insights.
+            </p>
+
+            <div class="flex flex-wrap gap-6 justify-center">
+                <a href="{{ url_for('auth.register') }}"
+                    class="bg-yellow-400 text-gray-900 font-semibold px-8 py-3 rounded-full hover:bg-yellow-300 transition transform hover:-translate-y-1 shadow-xl">
+                    Get Started Free
+                </a>
+
+                <a href="{{ url_for('auth.login') }}"
+                    class="border-2 border-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-purple-700 transition transform hover:-translate-y-1 shadow-xl">
+                    Sign In
+                </a>
+            </div>
+        </section>
+
+        <!-- Mountains -->
+        <div class="h-52 md:h-72 -my-16 md:my-0 overflow-hidden">
+            <img src="{{ url_for('static', filename='images/mountains.png') }}" class="w-full h-full object-cover"
+                alt="Mountain Background">
+        </div>
+
+    </div>
+
+    <!-- ================= FEATURES ================= -->
+    <section id="features" class="bg-gradient-to-br from-purple-700 to-pink-600 py-20 px-6 md:px-20 text-white ">
+
+        <h2 class="text-3xl md:text-5xl font-light text-center mb-16">
+            Where Does Your Money Really Go?
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-16">
+
+            <!-- LEFT CONTENT -->
+            <div class="space-y-8 text-lg leading-relaxed">
+                <p>
+                    <strong>Most people track expenses.</strong><br>
+                    <strong>Very few understand their spending patterns.</strong>
+                </p>
+
+                <p>Almost none can predict future financial behavior.</p>
+
+                <p class="text-xl mt-10 font-semibold">
+                    Manual budgeting is reactive.<br>
+                    Spendora makes it predictive.
+                </p>
             </div>
 
-            <!-- Nav Links -->
-            <div class="hidden md:flex space-x-10 text-sm tracking-wide">
-                <a href="#features" class="hover:opacity-100 opacity-80 transition">FEATURES</a>
-                <a href="#how-it-works" class="hover:opacity-100 opacity-80 transition">HOW IT WORKS</a>
-                <a href="#join" class="hover:opacity-100 opacity-80 transition">JOIN</a>
+            <!-- FEATURE CARDS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+
+                <!-- Card -->
+                <div class="relative p-8 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl
+                        hover:scale-105 hover:bg-white/30 transition duration-300">
+
+                    <div class="text-4xl mb-4">💰</div>
+                    <h3 class="text-xl font-bold mb-3">Smart Expense Tracking</h3>
+                    <p class="text-yellow-300 italic">Automatically categorize expenses</p>
+                </div>
+
+                <div class="relative p-8 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl
+                        hover:scale-105 hover:bg-white/30 transition duration-300">
+
+                    <div class="text-4xl mb-4">🔮</div>
+                    <h3 class="text-xl font-bold mb-3">AI-Based Categorization</h3>
+                    <p class="text-yellow-300 italic">Learn & improve over time</p>
+                </div>
+
+                <div class="relative p-8 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl
+                        hover:scale-105 hover:bg-white/30 transition duration-300">
+
+                    <div class="text-4xl mb-4">📊</div>
+                    <h3 class="text-xl font-bold mb-3">Budget Management</h3>
+                    <p class="text-yellow-300 italic">Real-time alerts & control</p>
+                </div>
+
+                <div class="relative p-8 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl
+                        hover:scale-105 hover:bg-white/30 transition duration-300">
+
+                    <div class="text-4xl mb-4">📈</div>
+                    <h3 class="text-xl font-bold mb-3">Spending Predictions</h3>
+                    <p class="text-yellow-300 italic">Know your future spending</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= HOW IT WORKS ================= -->
+        <div id="how-it-works" class="mt-32 max-w-6xl mx-auto">
+
+            <div class="text-center mb-16">
+                <h3 class="text-3xl md:text-5xl font-light tracking-widest mb-4">
+                    HOW IT WORKS
+                </h3>
+                <p class="text-lg opacity-80 max-w-2xl mx-auto">A seamless path from manually logging expenses to
+                    letting AI manage your financial life.</p>
             </div>
 
-            <!-- Signup Button -->
-            <a href="{{ url_for('auth.register') }}"
-               class="hidden md:inline-block bg-yellow-400 text-gray-900 font-semibold px-6 py-2 rounded-full hover:bg-yellow-300 transition transform hover:-translate-y-1 shadow-lg">
-               SIGN UP
-            </a>
+            <div class="space-y-16 lg:space-y-24">
 
+                <!-- Step 1 (Left) -->
+                <div class="relative flex flex-col md:flex-row items-center justify-between group">
+                    <!-- Connector Line (Hidden on mobile) -->
+                    <div
+                        class="hidden md:block absolute top-1/2 left-1/2 w-0.5 h-full bg-gradient-to-b from-white/40 to-white/10 -z-10 transform -translate-x-1/2">
+                    </div>
+
+                    <div
+                        class="w-full md:w-5/12 mb-8 md:mb-0 transform transition-transform duration-500 group-hover:-translate-x-2">
+                        <div
+                            class="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                            <div
+                                class="absolute -top-10 -right-10 w-32 h-32 bg-yellow-400 rounded-full blur-3xl opacity-20">
+                            </div>
+                            <div class="text-6xl mb-6">📝</div>
+                            <h4 class="text-2xl font-bold mb-3 text-yellow-300">1. Log Your Data</h4>
+                            <p class="text-lg text-white/90 leading-relaxed">Add your daily expenses via our beautifully
+                                minimal interface, or bulk upload your bank statements directly.</p>
+                        </div>
+                    </div>
+
+                    <div class="hidden md:flex w-2/12 justify-center">
+                        <div
+                            class="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 border-4 border-purple-800 flex items-center justify-center text-2xl font-black shadow-[0_0_30px_rgba(250,204,21,0.5)] z-10 text-purple-900">
+                            1
+                        </div>
+                    </div>
+                    <!-- Empty div for layout -->
+                    <div class="hidden md:block w-full md:w-5/12"></div>
+                </div>
+
+                <!-- Step 2 (Right) -->
+                <div class="relative flex flex-col md:flex-row-reverse items-center justify-between group">
+                    <div
+                        class="hidden md:block absolute top-1/2 left-1/2 w-0.5 h-full bg-gradient-to-b from-white/40 to-white/10 -z-10 transform -translate-x-1/2">
+                    </div>
+
+                    <div
+                        class="w-full md:w-5/12 mb-8 md:mb-0 transform transition-transform duration-500 group-hover:translate-x-2 text-left md:text-right">
+                        <div
+                            class="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                            <div
+                                class="absolute -top-10 -left-10 w-32 h-32 bg-cyan-400 rounded-full blur-3xl opacity-20">
+                            </div>
+                            <div class="text-6xl mb-6">🤖</div>
+                            <h4 class="text-2xl font-bold mb-3 text-cyan-300">2. AI Categorization</h4>
+                            <p class="text-lg text-white/90 leading-relaxed">Our trained Scikit-Learn models
+                                automatically scan your inputs and tag them into intelligent categories in real-time.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="hidden md:flex w-2/12 justify-center">
+                        <div
+                            class="w-16 h-16 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 border-4 border-purple-800 flex items-center justify-center text-2xl font-black shadow-[0_0_30px_rgba(34,211,238,0.5)] z-10 text-purple-900">
+                            2
+                        </div>
+                    </div>
+                    <!-- Empty div -->
+                    <div class="hidden md:block w-full md:w-5/12"></div>
+                </div>
+
+                <!-- Step 3 (Left) -->
+                <div class="relative flex flex-col md:flex-row items-center justify-between group">
+                    <div
+                        class="hidden md:block absolute top-1/2 left-1/2 w-0.5 h-full bg-gradient-to-b from-white/40 to-white/10 -z-10 transform -translate-x-1/2">
+                    </div>
+
+                    <div
+                        class="w-full md:w-5/12 mb-8 md:mb-0 transform transition-transform duration-500 group-hover:-translate-x-2">
+                        <div
+                            class="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                            <div
+                                class="absolute -bottom-10 -right-10 w-32 h-32 bg-pink-400 rounded-full blur-3xl opacity-20">
+                            </div>
+                            <div class="text-6xl mb-6">⚡</div>
+                            <h4 class="text-2xl font-bold mb-3 text-pink-300">3. Budget & Alerts</h4>
+                            <p class="text-lg text-white/90 leading-relaxed">Set monthly ceilings. The system actively
+                                monitors your trajectory and fires off warnings before you break your limit.</p>
+                        </div>
+                    </div>
+
+                    <div class="hidden md:flex w-2/12 justify-center">
+                        <div
+                            class="w-16 h-16 rounded-full bg-gradient-to-r from-pink-400 to-rose-500 border-4 border-purple-800 flex items-center justify-center text-2xl font-black shadow-[0_0_30px_rgba(244,114,182,0.5)] z-10 text-white">
+                            3
+                        </div>
+                    </div>
+                    <!-- Empty div -->
+                    <div class="hidden md:block w-full md:w-5/12"></div>
+                </div>
+
+                <!-- Step 4 (Right) -->
+                <div class="relative flex flex-col md:flex-row-reverse items-center justify-between group">
+                    <div
+                        class="hidden md:block absolute top-1/2 left-1/2 w-0.5 h-1/2 bottom-0 bg-transparent -z-10 transform -translate-x-1/2">
+                    </div>
+
+                    <div
+                        class="w-full md:w-5/12 transform transition-transform duration-500 group-hover:translate-x-2 text-left md:text-right">
+                        <div
+                            class="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                            <div
+                                class="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-400 rounded-full blur-3xl opacity-30">
+                            </div>
+                            <div class="text-6xl mb-6">🔭</div>
+                            <h4 class="text-2xl font-bold mb-3 text-purple-300">4. Predict The Future</h4>
+                            <p class="text-lg text-white/90 leading-relaxed">Look ahead. Spendora maps out your
+                                expected future financial habits using localized predictive modeling so you can
+                                adjust today.</p>
+                        </div>
+                    </div>
+
+                    <div class="hidden md:flex w-2/12 justify-center">
+                        <div
+                            class="w-16 h-16 rounded-full bg-gradient-to-r from-purple-400 to-indigo-500 border-4 border-purple-800 flex items-center justify-center text-2xl font-black shadow-[0_0_30px_rgba(168,85,247,0.5)] z-10 text-white">
+                            4
+                        </div>
+                    </div>
+                    <!-- Empty div -->
+                    <div class="hidden md:block w-full md:w-5/12"></div>
+                </div>
+
+            </div>
         </div>
-    </nav>
 
-    <!-- ================= HERO ================= -->
-    <section class="flex-1 flex flex-col items-center justify-center text-center px-6 md:px-20 py-16 relative z-10">
-
-        <h1 class="text-4xl md:text-6xl font-light tracking-widest mb-6 drop-shadow-lg">
-            Spendora
-        </h1>
-
-        <p class="max-w-2xl text-base md:text-lg leading-relaxed opacity-95 mb-10">
-            <strong>Smarter Budgeting. Predictive Spending. Complete Control.</strong><br>
-            Track your expenses, understand where your money goes, and predict future spending with AI-powered insights.
-        </p>
-
-        <div class="flex flex-wrap gap-6 justify-center">
-            <a href="{{ url_for('auth.register') }}"
-               class="bg-yellow-400 text-gray-900 font-semibold px-8 py-3 rounded-full hover:bg-yellow-300 transition transform hover:-translate-y-1 shadow-xl">
-                Get Started Free
-            </a>
-
-            <a href="{{ url_for('auth.login') }}"
-               class="border-2 border-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-purple-700 transition transform hover:-translate-y-1 shadow-xl">
-                Sign In
-            </a>
-        </div>
     </section>
 
-    <!-- Mountains -->
-    <div class="h-52 md:h-72 mt-auto overflow-hidden">
-        <img src="{{ url_for('static', filename='images/mountains.png') }}"
-             class="w-full h-full object-cover"
-             alt="Mountain Background">
-    </div>
+    <!-- ================= FOOTER CTA ================= -->
+    <section id="join"
+        class="relative bg-gradient-to-b from-pink-600 to-purple-900 py-32 px-6 text-center overflow-hidden">
 
-</div>
+        <!-- Decorative Ambient Orbs -->
+        <div
+            class="absolute top-1/2 left-1/4 w-96 h-96 bg-yellow-400 rounded-full mix-blend-overlay filter blur-[100px] opacity-40 transform -translate-y-1/2">
+        </div>
+        <div
+            class="absolute top-1/2 right-1/4 w-96 h-96 bg-cyan-400 rounded-full mix-blend-overlay filter blur-[100px] opacity-40 transform -translate-y-1/2">
+        </div>
 
-<!-- ================= FEATURES ================= -->
-<section id="features" class="bg-gradient-to-br from-purple-700 to-pink-600 py-20 px-6 md:px-20 text-white">
+        <!-- Main CTA Card -->
+        <div
+            class="relative max-w-4xl mx-auto bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl md:rounded-[2.5rem] p-8 md:p-16 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+            <h2
+                class="text-3xl md:text-5xl lg:text-6xl font-black mb-4 md:mb-6 tracking-tight text-white drop-shadow-md">
+                Ready to Take Control?
+            </h2>
 
-    <h2 class="text-3xl md:text-5xl font-light text-center mb-16">
-        Where Does Your Money Really Go?
-    </h2>
-
-    <div class="grid md:grid-cols-2 gap-16">
-
-        <!-- LEFT CONTENT -->
-        <div class="space-y-8 text-lg leading-relaxed">
-            <p>
-                <strong>Most people track expenses.</strong><br>
-                <strong>Very few understand their spending patterns.</strong>
+            <p class="max-w-2xl mx-auto mb-8 md:mb-12 text-lg md:text-2xl font-medium text-white/90 leading-relaxed">
+                Join Spendora today and step into the future of predictive, intelligent personal finance.
             </p>
 
-            <p>Almost none can predict future financial behavior.</p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6">
+                <a href="{{ url_for('auth.register') }}"
+                    class="w-full sm:w-auto flex items-center justify-center bg-gradient-to-r from-yellow-400 to-yellow-300 text-purple-900 px-6 py-4 md:px-10 md:py-5 rounded-full font-bold text-base md:text-lg hover:from-yellow-300 hover:to-yellow-200 hover:-translate-y-1 transition-all shadow-[0_0_30px_rgba(250,204,21,0.5)] whitespace-nowrap">
+                    <span class="mr-2 text-xl">🚀</span> Get Started Free
+                </a>
 
-            <p class="text-xl mt-10 font-semibold">
-                Manual budgeting is reactive.<br>
-                Spendora makes it predictive.
-            </p>
+                <a href="{{ url_for('auth.login') }}"
+                    class="w-full sm:w-auto flex items-center justify-center bg-white/5 border border-white/30 text-white px-6 py-4 md:px-10 md:py-5 rounded-full font-bold text-base md:text-lg hover:bg-white hover:text-purple-800 hover:-translate-y-1 transition-all shadow-xl backdrop-blur-md whitespace-nowrap">
+                    Sign In to Dashboard
+                </a>
+            </div>
         </div>
 
-        <!-- FEATURE CARDS -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+    </section>
 
-            <!-- Card -->
-            <div class="relative p-8 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl
-                        hover:scale-105 hover:bg-white/30 transition duration-300">
-
-                <div class="text-4xl mb-4">💰</div>
-                <h3 class="text-xl font-bold mb-3">Smart Expense Tracking</h3>
-                <p class="text-yellow-300 italic">Automatically categorize expenses</p>
+    <!-- ================= FOOTER ================= -->
+    <footer class="bg-purple-950 py-8 text-center text-sm text-white/60 border-t border-purple-900/50">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" class="h-6 opacity-70 grayscale"
+                    alt="Logo">
+                <span>© 2026 Spendora. All rights reserved.</span>
             </div>
-
-            <div class="relative p-8 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl
-                        hover:scale-105 hover:bg-white/30 transition duration-300">
-
-                <div class="text-4xl mb-4">🔮</div>
-                <h3 class="text-xl font-bold mb-3">AI-Based Categorization</h3>
-                <p class="text-yellow-300 italic">Learn & improve over time</p>
+            <div class="text-xs uppercase tracking-widest">
+                Main Project by <span class="text-white/90 font-bold ml-1">ELIZABATH K SAJI</span>
             </div>
-
-            <div class="relative p-8 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl
-                        hover:scale-105 hover:bg-white/30 transition duration-300">
-
-                <div class="text-4xl mb-4">📊</div>
-                <h3 class="text-xl font-bold mb-3">Budget Management</h3>
-                <p class="text-yellow-300 italic">Real-time alerts & control</p>
-            </div>
-
-            <div class="relative p-8 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl
-                        hover:scale-105 hover:bg-white/30 transition duration-300">
-
-                <div class="text-4xl mb-4">📈</div>
-                <h3 class="text-xl font-bold mb-3">Spending Predictions</h3>
-                <p class="text-yellow-300 italic">Know your future spending</p>
-            </div>
-
         </div>
-    </div>
+    </footer>
 
-    <!-- ================= HOW IT WORKS ================= -->
-    <div id="how-it-works" class="mt-28">
-
-        <h3 class="text-3xl md:text-4xl font-light text-center mb-16 tracking-widest">
-            HOW IT WORKS
-        </h3>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-
-            <div class="bg-white text-gray-700 p-10 rounded-2xl text-center shadow-xl hover:-translate-y-2 transition">
-                <div class="text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-4">1</div>
-                <p>Add your daily expenses.</p>
-            </div>
-
-            <div class="bg-white text-gray-700 p-10 rounded-2xl text-center shadow-xl hover:-translate-y-2 transition">
-                <div class="text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-4">2</div>
-                <p>Spendora categorizes and updates your budget in real time.</p>
-            </div>
-
-            <div class="bg-white text-gray-700 p-10 rounded-2xl text-center shadow-xl hover:-translate-y-2 transition">
-                <div class="text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-4">3</div>
-                <p>AI analyzes patterns and predicts future spending.</p>
-            </div>
-
-            <div class="bg-white text-gray-700 p-10 rounded-2xl text-center shadow-xl hover:-translate-y-2 transition">
-                <div class="text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-4">4</div>
-                <p>You make smarter financial decisions.</p>
-            </div>
-
-        </div>
-    </div>
-
-</section>
-
-<!-- ================= FOOTER CTA ================= -->
-<section id="join" class="bg-gradient-to-br from-purple-700 to-pink-600 py-20 px-6 text-center">
-
-    <h2 class="text-3xl md:text-5xl font-light mb-6">
-        Ready to Take Control?
-    </h2>
-
-    <p class="max-w-2xl mx-auto mb-10 text-lg opacity-95">
-        Start your journey to smarter spending and better financial decisions today.
-    </p>
-
-    <div class="flex flex-wrap justify-center gap-6">
-        <a href="{{ url_for('auth.register') }}"
-           class="bg-yellow-400 text-gray-900 px-8 py-3 rounded-full font-semibold hover:bg-yellow-300 transition shadow-xl">
-            Get Started Free
-        </a>
-
-        <a href="{{ url_for('auth.login') }}"
-           class="border-2 border-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-purple-700 transition shadow-xl">
-            Sign In
-        </a>
-    </div>
-
-</section>
-
-<footer class="bg-gradient-to-br from-purple-700 to-pink-600 py-6 text-center text-sm opacity-90">
-    © 2026 Spendora. All rights reserved. <br>Main Project by ELIZABATH K SAJI.
-</footer>
-
-<!-- Flowbite JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+    <!-- Flowbite JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
 
 </body>
+
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,6 +26,7 @@
             border: 2px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 0 30px rgba(255, 255, 255, 0.2), inset 0 0 30px rgba(255, 255, 255, 0.1);
         }
+
         .star {
             position: absolute;
             width: 2px;
@@ -33,6 +35,7 @@
             border-radius: 50%;
             opacity: 0.6;
         }
+
         input:-webkit-autofill,
         input:-webkit-autofill:hover,
         input:-webkit-autofill:focus,
@@ -44,89 +47,93 @@
         }
     </style>
 </head>
+
 <body class="overflow-x-hidden">
-    <div class="min-h-screen bg-gradient-to-b from-primary via-primary-dark to-accent flex flex-col items-center justify-center px-4 relative">
+    <div
+        class="min-h-screen bg-gradient-to-b from-primary via-primary-dark to-accent flex flex-col items-center justify-center px-4 relative">
         <!-- Starfield background -->
         <div id="starfield" class="absolute inset-0"></div>
 
         <!-- Mountains -->
         <div class="absolute bottom-0 left-0 right-0 h-64 md:h-48 sm:h-32 overflow-hidden">
-            <img src="{{ url_for('static', filename='images/mountains.png') }}" alt="Mountain Background" class="w-full h-full object-cover object-center">
+            <img src="{{ url_for('static', filename='images/mountains.png') }}" alt="Mountain Background"
+                class="w-full h-full object-cover object-center">
         </div>
 
         <!-- Register Card -->
         <div class="relative z-10 w-full max-w-md">
             <div class="neon-border bg-white bg-opacity-10 backdrop-blur-lg rounded-3xl px-8 py-12 md:px-6 md:py-10">
-                
+
                 <!-- Logo Section -->
                 <div class="flex flex-col items-center mb-10">
-                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Spendora Logo" class="h-16 w-auto mb-4">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Spendora Logo"
+                        class="h-16 w-auto mb-4">
                     <h1 class="text-4xl font-light tracking-widest text-white drop-shadow-lg">REGISTER</h1>
                 </div>
 
                 <!-- Flash Messages -->
                 {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="mb-6 p-4 rounded-lg bg-{{ 'red' if category == 'error' else 'green' }}-500 bg-opacity-20 border border-{{ 'red' if category == 'error' else 'green' }}-400 text-white text-sm">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div
+                    class="flash-message mb-6 p-4 rounded-lg bg-{{ 'red' if category == 'error' else 'green' }}-500 bg-opacity-20 border border-{{ 'red' if category == 'error' else 'green' }}-400 text-white text-sm transition-opacity duration-500">
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
                 {% endwith %}
 
                 <!-- Register Form -->
                 <form method="POST" class="space-y-5">
                     <!-- Name Input -->
                     <div>
-                        <input 
-                            type="text" 
-                            name="name" 
-                            placeholder="enter your full name" 
+                        <input type="text" name="name" value="{{ name or '' }}" placeholder="enter your full name"
                             class="w-full bg-transparent border-b-2 rounded-lg border-white/50 text-white placeholder-white/60 px-4 py-3 focus:outline-none focus:border-white rounded-lg hover:border-white transition-all duration-300"
                             required>
                     </div>
 
                     <!-- Email Input -->
                     <div>
-                        <input 
-                            type="email" 
-                            name="email" 
-                            placeholder="enter your email id" 
+                        <input type="email" name="email" value="{{ email or '' }}" placeholder="enter your email id"
                             class="w-full bg-transparent border-b-2 rounded-lg border-white/50 text-white placeholder-white/60 px-4 py-3 focus:outline-none focus:border-white rounded-lg hover:border-white transition-all duration-300"
                             required>
                     </div>
 
                     <!-- Password Input -->
                     <div>
-                        <input 
-                            type="password" 
-                            name="password" 
-                            placeholder="enter your password" 
+                        <input type="password" name="password" id="password-input" placeholder="enter your password"
                             class="w-full bg-transparent border-b-2 rounded-lg border-white/50 text-white placeholder-white/60 px-4 py-3 focus:outline-none focus:border-white rounded-lg hover:border-white transition-all duration-300"
                             required>
+                        <ul id="password-requirements"
+                            class="text-white/70 text-sm mt-3 space-y-1 hidden px-2 transition-all duration-300">
+                            <li id="req-length" class="flex items-center"><span
+                                    class="w-4 mr-1 text-center font-bold">○</span> At least 6 characters</li>
+                            <li id="req-letter" class="flex items-center"><span
+                                    class="w-4 mr-1 text-center font-bold">○</span> At least one letter</li>
+                            <li id="req-digit" class="flex items-center"><span
+                                    class="w-4 mr-1 text-center font-bold">○</span> At least one number</li>
+                        </ul>
                     </div>
 
                     <!-- Confirm Password Input -->
                     <div>
-                        <input 
-                            type="password" 
-                            name="password_confirm" 
-                            placeholder="confirm your password" 
+                        <input type="password" name="password_confirm" placeholder="confirm your password"
                             class="w-full bg-transparent border-b-2 rounded-lg border-white/50 text-white placeholder-white/60 px-4 py-3 focus:outline-none focus:border-white rounded-lg hover:border-white transition-all duration-300"
                             required>
                     </div>
 
                     <!-- Register Button -->
-                    <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-6 rounded-xl transition-all hover:shadow-lg hover:shadow-primary/50 mt-8">
+                    <button type="submit"
+                        class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-6 rounded-xl transition-all hover:shadow-lg hover:shadow-primary/50 mt-8">
                         Register
                     </button>
                 </form>
 
                 <!-- Login Link -->
                 <p class="text-center mt-8 text-white text-opacity-90">
-                    already have an account? 
-                    <a href="{{ url_for('auth.login') }}" class="text-gold hover:text-yellow-300 font-semibold transition-colors underline">Login here</a>
+                    already have an account?
+                    <a href="{{ url_for('auth.login') }}"
+                        class="text-gold hover:text-yellow-300 font-semibold transition-colors underline">Login here</a>
                 </p>
             </div>
         </div>
@@ -147,6 +154,51 @@
             }
         }
         createStars();
+
+        // Password requirement tracking
+        const passwordInput = document.getElementById('password-input');
+        const requirementsBox = document.getElementById('password-requirements');
+
+        function updateRequirement(reqElementId, isValid) {
+            const element = document.getElementById(reqElementId);
+            const iconSpan = element.querySelector('span');
+            if (isValid) {
+                element.classList.replace('text-white/70', 'text-green-400');
+                iconSpan.textContent = '✓';
+            } else {
+                element.classList.replace('text-green-400', 'text-white/70');
+                iconSpan.textContent = '○';
+            }
+        }
+
+        passwordInput.addEventListener('focus', () => {
+            requirementsBox.classList.remove('hidden');
+        });
+
+        passwordInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+
+            // At least 6 character check
+            updateRequirement('req-length', val.length >= 6);
+
+            // At least one letter check
+            updateRequirement('req-letter', /[a-zA-Z]/.test(val));
+
+            // At least one digit check
+            updateRequirement('req-digit', /\d/.test(val));
+        });
+
+        // Auto-Dismiss Flash Messages
+        document.addEventListener("DOMContentLoaded", function () {
+            const flashes = document.querySelectorAll('.flash-message');
+            flashes.forEach(flash => {
+                setTimeout(() => {
+                    flash.style.opacity = '0';
+                    setTimeout(() => flash.remove(), 500); // Wait for transition to finish
+                }, 5000); // 5 seconds
+            });
+        });
     </script>
 </body>
+
 </html>

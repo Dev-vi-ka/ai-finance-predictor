@@ -1,230 +1,260 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="flex h-screen bg-gray-100">
-    <!-- Sidebar Navigation -->
-    <div class="w-80 bg-gradient-to-b from-purple-700 to-purple-800 text-white p-8 flex flex-col">
-        <!-- Logo -->
-        <div class="mb-12">
-            <h1 class="text-3xl font-bold">◆ Spendora</h1>
+<div class="py-6 space-y-8">
+
+    <!-- Greeting Header -->
+    <div
+        class="relative bg-gradient-to-r from-purple-600 to-pink-500 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between text-white shadow-xl overflow-hidden">
+        <div class="relative z-10 text-center md:text-left">
+            <h1 class="text-4xl md:text-5xl font-bold mb-3">Hi, {{ user_name }}</h1>
+            <p class="text-purple-100 text-lg opacity-90 max-w-lg">Welcome to Spendora. Here's your intelligent
+                financial overview for today.</p>
         </div>
 
-        <!-- Navigation Items -->
-        <nav class="flex-1 space-y-6 text-lg">
-            <a href="{{ url_for('transaction.add_transaction_route') }}" class="block hover:text-yellow-300 transition-colors">
-                ➕ Add / Bulk Upload Transactions
-            </a>
-            <a href="{{ url_for('transaction.history') }}" class="block hover:text-yellow-300 transition-colors">
-                📊 View All Transactions
-            </a>
-            <a href="{{ url_for('recurring.index') }}" class="block hover:text-yellow-300 transition-colors">
-                Manage Recurring bills
-            </a>
-            <a href="{{ url_for('budget.set_budget_route') }}" class="block hover:text-yellow-300 transition-colors">
-                Add Budget
-            </a>
-            <button id="togglePredictionBtn" class="block hover:text-yellow-300 transition-colors text-left w-full">
-                See next month's prediction
-            </button>
-            <button id="toggleExpenseBtn" class="block hover:text-yellow-300 transition-colors text-left w-full">
-                Expense Breakdown
-            </button>
-            <button id="toggleTransactionBtn" class="block hover:text-yellow-300 transition-colors text-left w-full">
-                Recent transactions
-            </button>
-        </nav>
-
-        <!-- Health Score Card -->
-        <div class="bg-red-500 rounded-2xl p-6 text-center mb-6">
-            <p class="text-white text-sm opacity-90 mb-2">Health score</p>
-            <h2 class="text-5xl font-bold text-white">{{ health_score }}%</h2>
+        <div
+            class="relative z-10 mt-8 md:mt-0 bg-white/20 backdrop-blur-md rounded-2xl p-6 text-center border border-white/30 shadow-lg">
+            <p class="text-sm font-semibold uppercase tracking-wider text-purple-100 mb-2">Health Score</p>
+            <h2 class="text-5xl md:text-6xl font-bold">{{ health_score }}<span class="text-2xl">%</span></h2>
         </div>
 
-        <!-- Admin Panel Link (Only for Admin) -->
-        {% if is_admin %}
-        <div class="space-y-3 mb-6">
-            <div class="bg-yellow-600 rounded-lg p-3">
-                <a href="{{ url_for('admin.dashboard') }}" class="block text-white font-semibold text-center hover:text-yellow-100 transition-colors text-sm">
-                    👑 Admin Panel
-                </a>
-            </div>
-            <div class="bg-yellow-600 bg-opacity-75 rounded-lg p-2">
-                <a href="{{ url_for('admin.analytics') }}" class="block text-white font-semibold text-center hover:text-yellow-100 transition-colors text-xs">
-                    📊 Analytics
-                </a>
-            </div>
-            <div class="bg-yellow-600 bg-opacity-75 rounded-lg p-2">
-                <a href="{{ url_for('admin.export_report', format='json') }}" class="block text-white font-semibold text-center hover:text-yellow-100 transition-colors text-xs">
-                    ⬇️ Export Report
-                </a>
-            </div>
+        <!-- Abstract Shapes -->
+        <div
+            class="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-white opacity-10 rounded-full blur-3xl mix-blend-overlay">
         </div>
-        {% endif %}
-
-        <!-- Logout Button -->
-        <a href="{{ url_for('auth.logout') }}" class="block text-center hover:text-yellow-300 transition-colors font-semibold">
-            Logout
-        </a>
+        <div class="absolute bottom-0 left-10 w-48 h-48 bg-pink-300 opacity-20 rounded-full blur-2xl mix-blend-overlay">
+        </div>
     </div>
 
-    <!-- Main Content Area -->
-    <div class="flex-1 overflow-auto">
-        <div class="p-8">
-
-            <!-- Greeting Header -->
-            <div class="bg-gradient-to-r from-purple-300 to-pink-300 rounded-3xl p-8 mb-8 flex items-center justify-between">
-                <div>
-                    <h1 class="text-4xl font-bold text-gray-800 mb-2">Hi, {{ user_name }}</h1>
-                    <p class="text-gray-700">Lorem ipsum doloe se emit Lorem ipsum</p>
-                </div>
-                <div class="w-32 h-32 opacity-80">
-                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
-                        <circle cx="100" cy="80" r="30" fill="#8B5A3C"/>
-                        <ellipse cx="100" cy="120" rx="40" ry="45" fill="#D4A574"/>
-                        <ellipse cx="75" cy="100" rx="25" ry="30" fill="#B8956A"/>
-                        <ellipse cx="125" cy="100" rx="25" ry="30" fill="#B8956A"/>
+    <!-- Overview Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Income Card -->
+        <a href="{{ url_for('transaction.history') }}"
+            class="block cursor-pointer bg-white rounded-2xl p-6 shadow-md border-l-4 border-green-500 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-gray-500 font-bold tracking-wide uppercase text-sm">Total Income</p>
+                <div
+                    class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 group-hover:bg-green-500 group-hover:text-white transition-colors duration-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
                 </div>
             </div>
+            <h3 class="text-4xl font-black text-gray-800 tracking-tight">₹{{ "%.2f"|format(total_income) }}</h3>
+        </a>
 
-            <!-- Month Filter Section -->
-            <div class="mb-6">
-                <form method="GET" class="inline-flex items-center gap-3">
-                    <label for="monthFilterDash" class="text-gray-700 font-semibold">Filter by Month:</label>
-                    <select name="month" id="monthFilterDash" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" onchange="this.form.submit();">
-                        <option value="">All Time</option>
-                        {% for month in available_months %}
-                            <option value="{{ month }}" {% if selected_month == month %}selected{% endif %}>
-                                {{ month }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    <a href="{{ url_for('dashboard.index') }}" class="text-blue-600 hover:underline text-sm font-semibold{% if not selected_month %} hidden{% endif %}">Clear Filter</a>
-                </form>
+        <!-- Expense Card -->
+        <a href="{{ url_for('transaction.history') }}"
+            class="block cursor-pointer bg-white rounded-2xl p-6 shadow-md border-l-4 border-red-500 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-gray-500 font-bold tracking-wide uppercase text-sm">Total Expense</p>
+                <div
+                    class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-600 group-hover:bg-red-500 group-hover:text-white transition-colors duration-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                    </svg>
+                </div>
             </div>
-            {% if selected_month and monthly_summary %}
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <p class="text-sm text-gray-600 mb-2"><strong>Month Selected:</strong> {{ selected_month }}</p>
-                <div class="grid grid-cols-4 gap-4 text-center">
-                    <div>
-                        <p class="text-gray-600 text-sm">Income</p>
-                        <p class="text-lg font-bold text-green-600">₹{{ "%.2f"|format(monthly_summary['income']) }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600 text-sm">Expense</p>
-                        <p class="text-lg font-bold text-red-600">₹{{ "%.2f"|format(monthly_summary['expense']) }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600 text-sm">Savings</p>
-                        <p class="text-lg font-bold {% if monthly_summary['savings'] >= 0 %}text-green-600{% else %}text-red-600{% endif %}">₹{{ "%.2f"|format(monthly_summary['savings']) }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600 text-sm">Savings Rate</p>
-                        <p class="text-lg font-bold text-blue-600">
-                            {% if monthly_summary['income'] > 0 %}
-                                {{ "%.1f"|format((monthly_summary['savings'] / monthly_summary['income']) * 100) }}%
+            <h3 class="text-4xl font-black text-gray-800 tracking-tight">₹{{ "%.2f"|format(total_expense) }}</h3>
+        </a>
+
+        <!-- Savings Card -->
+        <a href="{{ url_for('transaction.history') }}"
+            class="block cursor-pointer bg-white rounded-2xl p-6 shadow-md border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-gray-500 font-bold tracking-wide uppercase text-sm">Net Savings</p>
+                <div
+                    class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 group-hover:bg-blue-500 group-hover:text-white transition-colors duration-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                </div>
+            </div>
+            <h3
+                class="text-4xl font-black {% if savings >= 0 %}text-green-600{% else %}text-red-500{% endif %} tracking-tight">
+                ₹{{ "%.2f"|format(savings) }}</h3>
+        </a>
+    </div>
+
+    <!-- Quick Actions & Filter -->
+    <div
+        class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+        <div class="flex flex-wrap items-center justify-center gap-3 w-full md:w-auto">
+            <button id="toggleExpenseBtn"
+                class="flex-1 md:flex-none px-5 py-2.5 bg-indigo-50 text-indigo-700 font-bold rounded-xl hover:bg-indigo-100 transition-colors border border-indigo-100">
+                📊 Breakdowns
+            </button>
+            <button id="togglePredictionBtn"
+                class="flex-1 md:flex-none px-5 py-2.5 bg-pink-50 text-pink-700 font-bold rounded-xl hover:bg-pink-100 transition-colors border border-pink-100">
+                🔮 AI Prediction
+            </button>
+            <a href="{{ url_for('transaction.add_transaction_route') }}"
+                class="flex-1 md:flex-none px-5 py-2.5 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-colors shadow-md text-center">
+                + Add Txn
+            </a>
+        </div>
+
+        <form method="GET" class="w-full md:w-auto relative">
+            <select name="month"
+                class="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-800 font-semibold rounded-xl pl-4 pr-10 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none cursor-pointer"
+                onchange="this.form.submit();">
+                <option value="">All Time Overview</option>
+                {% for month in available_months %}
+                <option value="{{ month }}" {% if selected_month==month %}selected{% endif %}>{{ month }}</option>
+                {% endfor %}
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+        </form>
+    </div>
+
+    {% if selected_month and monthly_summary %}
+    <!-- Active Filter Alert -->
+    <div
+        class="bg-blue-50 border border-blue-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row gap-6 items-center justify-between">
+        <div>
+            <h4 class="font-bold text-blue-900 text-lg flex items-center mb-1">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
+                    </path>
+                </svg>
+                Showing insights for {{ selected_month }}
+            </h4>
+            <a href="{{ url_for('dashboard.index') }}"
+                class="text-sm text-blue-600 hover:text-blue-800 hover:underline font-semibold">Clear active filter
+                constraints</a>
+        </div>
+
+        <div class="flex flex-wrap gap-6 text-center">
+            <div>
+                <p class="text-xs text-blue-700 uppercase font-bold tracking-wider mb-1">Income</p>
+                <p class="text-xl font-bold text-gray-900">₹{{ "%.2f"|format(monthly_summary['income']) }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-blue-700 uppercase font-bold tracking-wider mb-1">Expense</p>
+                <p class="text-xl font-bold text-gray-900">₹{{ "%.2f"|format(monthly_summary['expense']) }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-blue-700 uppercase font-bold tracking-wider mb-1">Savings Rate</p>
+                <p
+                    class="text-xl font-bold {% if monthly_summary['income'] > 0 and (monthly_summary['savings']/monthly_summary['income']) > 0.2 %}text-green-600{% else %}text-red-500{% endif %}">
+                    {% if monthly_summary['income'] > 0 %}{{ "%.1f"|format((monthly_summary['savings'] /
+                    monthly_summary['income']) * 100) }}%{% else %}N/A{% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Prediction Chart Section -->
+    <div id="predictionChartContainer" class="hidden transform transition-all duration-500">
+        <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <span class="bg-pink-100 text-pink-600 p-2.5 rounded-xl mr-4">🔮</span>
+                Spending Trend & AI Prediction
+            </h3>
+            <div class="w-full h-80 relative">
+                <canvas id="predictionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Graphic Section (Pie & Bar) -->
+        <div class="lg:col-span-1 space-y-8" id="expenseChartContainerOuter">
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-indigo-100 text-indigo-600 p-2 rounded-xl mr-3">📊</span>
+                    Expense Breakdown
+                </h3>
+                <div class="relative w-full aspect-square max-w-[280px] mx-auto">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hidden md:block"
+                id="budgetChartContainer">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Volume Distribution</h3>
+                <canvas id="budgetChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Transactions Section -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden h-full flex flex-col">
+                <div class="p-4 md:p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                    <h3 class="text-lg md:text-xl font-bold text-gray-800 flex items-center">
+                        <span class="bg-gray-200 text-gray-700 p-2 rounded-xl mr-2 md:mr-3 shrink-0">📝</span>
+                        Recent Transactions
+                    </h3>
+                    <a href="{{ url_for('transaction.history') }}"
+                        class="text-sm font-bold text-purple-600 hover:text-purple-800 hover:bg-purple-50 px-3 md:px-4 py-2 rounded-lg transition-colors whitespace-nowrap shrink-0 ml-4">View
+                        All &rarr;</a>
+                </div>
+
+                <div class="overflow-x-auto flex-1 h-full w-full">
+                    <table class="w-full text-sm text-left text-gray-600 min-w-[500px]">
+                        <thead class="text-xs text-gray-400 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 font-semibold tracking-wider">Date</th>
+                                <th scope="col" class="px-6 py-4 font-semibold tracking-wider whitespace-nowrap">Description</th>
+                                <th scope="col" class="px-6 py-4 font-semibold tracking-wider">Category</th>
+                                <th scope="col" class="px-6 py-4 font-semibold tracking-wider text-right">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for txn in recent_transactions %}
+                            <tr class="hover:bg-purple-50/50 transition-colors duration-200 group">
+                                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{{ txn['date'][5:] if
+                                    txn['date'] else '' }}</td>
+                                <td class="px-6 py-4 font-semibold text-gray-800">{{ txn['description'] }}</td>
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full border border-gray-200 shadow-sm group-hover:bg-white transition-colors whitespace-nowrap">
+                                        {{ txn['category'] }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    {% if txn['amount'] > 0 %}
+                                    <span class="text-green-600 font-bold bg-green-50 px-3 py-1 rounded-lg whitespace-nowrap">+₹{{
+                                        txn['amount'] }}</span>
+                                    {% else %}
+                                    <span class="text-red-600 font-bold bg-red-50 px-3 py-1 rounded-lg whitespace-nowrap">-₹{{ txn['amount'] | abs }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
                             {% else %}
-                                N/A
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Overview Section -->
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Overview</h2>
-            <div class="grid grid-cols-3 gap-6 mb-8">
-                <!-- Income Card -->
-                <div class="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl p-6 text-white shadow-lg">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-4xl">💰</span>
-                    </div>
-                    <h3 class="text-3xl font-bold mb-1">${{ total_income }}</h3>
-                    <p class="text-yellow-100 font-semibold">Income</p>
-                </div>
-
-                <!-- Expense Card -->
-                <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-4xl">💸</span>
-                    </div>
-                    <h3 class="text-3xl font-bold mb-1">${{ total_expense }}</h3>
-                    <p class="text-purple-100 font-semibold">Expense</p>
-                </div>
-
-                <!-- Savings Card -->
-                <div class="bg-gradient-to-br from-pink-400 to-pink-500 rounded-2xl p-6 text-white shadow-lg">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-4xl">🏦</span>
-                    </div>
-                    <h3 class="text-3xl font-bold mb-1">${{ savings }}</h3>
-                    <p class="text-pink-100 font-semibold">Savings</p>
-                </div>
-            </div>
-
-            <!-- Prediction Chart Section -->
-            <div id="predictionChartContainer" class="hidden mb-8">
-                <div class="bg-white rounded-xl p-6 shadow-md">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Spending Trend & Prediction 🔮</h3>
-                    <p id="predictionText" class="text-gray-500 mb-4">Loading prediction...</p>
-                    <canvas id="predictionChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Expense Breakdown Section -->
-            <div id="expenseChartContainer" class="hidden mb-8">
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl p-6 shadow-md">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">Expense Breakdown (Pie Chart)</h3>
-                        <canvas id="expenseChart"></canvas>
-                    </div>
-                    <div class="bg-white rounded-xl p-6 shadow-md">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">Budget Tracking (Bar Chart)</h3>
-                        <canvas id="budgetChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Transactions Section -->
-            <div id="transactionContainer" class="hidden">
-                <div class="bg-white rounded-xl p-6 shadow-md">
-                    <h3 class="text-xl font-bold text-gray-800 mb-6">Recent Transactions</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="border-b-2 border-gray-200">
-                                <tr class="text-left text-gray-600 text-sm">
-                                    <th class="pb-3">Date</th>
-                                    <th class="pb-3">Description</th>
-                                    <th class="pb-3">Category</th>
-                                    <th class="pb-3 text-right">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for txn in recent_transactions %}
-                                <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                    <td class="py-3 text-gray-700">{{ txn['date'] }}</td>
-                                    <td class="py-3 text-gray-700">{{ txn['description'] }}</td>
-                                    <td class="py-3 text-gray-700">{{ txn['category'] }}</td>
-                                    <td class="py-3 text-right">
-                                        {% if txn['amount'] > 0 %}
-                                        <span class="text-green-600 font-semibold">+ ₹{{ txn['amount'] }}</span>
-                                        {% else %}
-                                        <span class="text-red-600 font-semibold">- ₹{{ txn['amount'] | abs }}</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                            <tr>
+                                <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                                    <div class="flex flex-col items-center justify-center p-4">
+                                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-lg font-medium text-gray-500 mb-2">No transactions recorded yet.</p>
+                                        <a href="{{ url_for('transaction.add_transaction_route') }}"
+                                            class="text-purple-600 font-bold hover:underline mb-2">Add your first transaction</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script type="application/json" id="categoryDataScript">
@@ -232,179 +262,132 @@
 </script>
 
 <script>
-    // Get toggle buttons and containers
     const togglePredictionBtn = document.getElementById('togglePredictionBtn');
     const toggleExpenseBtn = document.getElementById('toggleExpenseBtn');
-    const toggleTransactionBtn = document.getElementById('toggleTransactionBtn');
-    
+
     const predictionChartContainer = document.getElementById('predictionChartContainer');
-    const expenseChartContainer = document.getElementById('expenseChartContainer');
-    const transactionContainer = document.getElementById('transactionContainer');
-    
+    const expenseChartContainerOuter = document.getElementById('expenseChartContainerOuter');
+
     let predictionChartInitialized = false;
     let expenseChartInitialized = false;
 
-    // Toggle Prediction Chart
-    togglePredictionBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        predictionChartContainer.classList.toggle('hidden');
-        
-        if (!predictionChartContainer.classList.contains('hidden') && !predictionChartInitialized) {
-            initializePredictionChart();
-            predictionChartInitialized = true;
-        }
-        
-        if (!predictionChartContainer.classList.contains('hidden')) {
-            predictionChartContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    // Auto-init visible charts
+    window.addEventListener('DOMContentLoaded', () => {
+        initializeExpenseCharts();
+        expenseChartInitialized = true;
     });
 
-    // Toggle Expense Breakdown
-    toggleExpenseBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        expenseChartContainer.classList.toggle('hidden');
-        
-        if (!expenseChartContainer.classList.contains('hidden') && !expenseChartInitialized) {
-            initializeExpenseCharts();
-            expenseChartInitialized = true;
-        }
-        
-        if (!expenseChartContainer.classList.contains('hidden')) {
-            expenseChartContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    });
+    if (togglePredictionBtn) {
+        togglePredictionBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            predictionChartContainer.classList.toggle('hidden');
 
-    // Toggle Recent Transactions
-    toggleTransactionBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        transactionContainer.classList.toggle('hidden');
-        
-        if (!transactionContainer.classList.contains('hidden')) {
-            transactionContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    });
+            if (!predictionChartContainer.classList.contains('hidden') && !predictionChartInitialized) {
+                initializePredictionChart();
+                predictionChartInitialized = true;
+            }
+        });
+    }
+
+    if (toggleExpenseBtn) {
+        toggleExpenseBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            expenseChartContainerOuter.classList.toggle('hidden');
+        });
+    }
 
     function initializePredictionChart() {
-        // Parse category data from script tag
         const categoryDataJson = document.getElementById('categoryDataScript').textContent;
         const categoryData = JSON.parse(categoryDataJson);
-
         const labels = categoryData.map(item => item.category);
         const values = categoryData.map(item => item.total);
 
         const ctx = document.getElementById('predictionChart').getContext('2d');
-
         new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Spending Trend',
+                    label: 'Trend Forecast',
                     data: values,
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                    borderWidth: 2,
+                    borderColor: '#ec4899',
+                    backgroundColor: 'rgba(236, 72, 153, 0.15)',
+                    borderWidth: 3,
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    pointBackgroundColor: '#ec4899',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
                 }]
             },
             options: {
                 responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    }
-                },
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
                 scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+                    y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f3f4f6' } },
+                    x: { grid: { display: false } }
                 }
             }
         });
     }
 
     function initializeExpenseCharts() {
-        // Parse category data from script tag
         const categoryDataJson = document.getElementById('categoryDataScript').textContent;
         const categoryData = JSON.parse(categoryDataJson);
-
         const labels = categoryData.map(item => item.category);
         const values = categoryData.map(item => item.total);
+
+        const palette = ['#8b5cf6', '#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#64748b', '#06b6d4', '#ef4444'];
 
         // Pie Chart
         const pieCtx = document.getElementById('expenseChart').getContext('2d');
         new Chart(pieCtx, {
-            type: 'pie',
+            type: 'doughnut',
             data: {
                 labels: labels,
                 datasets: [{
                     data: values,
-                    backgroundColor: [
-                        '#4e73df',
-                        '#1cc88a',
-                        '#36b9cc',
-                        '#f6c23e',
-                        '#e74a3b',
-                        '#858796'
-                    ]
+                    backgroundColor: palette,
+                    borderWidth: 0,
+                    hoverOffset: 6
                 }]
             },
             options: {
                 responsive: true,
+                cutout: '70%',
                 plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { weight: 'bold' } } }
                 }
             }
         });
 
-        // Bar Chart for Budget Tracking
-        const barCtx = document.getElementById('budgetChart').getContext('2d');
-        new Chart(barCtx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Money Spent by Category',
-                    data: values,
-                    backgroundColor: [
-                        '#667eea',
-                        '#764ba2',
-                        '#f093fb',
-                        '#4facfe',
-                        '#00f2fe',
-                        '#43e97b'
-                    ],
-                    borderColor: [
-                        '#667eea',
-                        '#764ba2',
-                        '#f093fb',
-                        '#4facfe',
-                        '#00f2fe',
-                        '#43e97b'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                indexAxis: 'y',
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
+        // Bar Chart
+        if (document.getElementById('budgetChart')) {
+            const barCtx = document.getElementById('budgetChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Volume',
+                        data: values,
+                        backgroundColor: palette,
+                        borderRadius: 8
+                    }]
                 },
-                scales: {
-                    x: {
-                        beginAtZero: true
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f3f4f6' } },
+                        x: { grid: { display: false } }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 </script>
-
 {% endblock %}

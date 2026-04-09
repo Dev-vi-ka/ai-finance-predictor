@@ -68,7 +68,7 @@
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                         {% for category, message in messages %}
-                            <div class="mb-6 p-4 rounded-lg bg-{{ 'red' if category == 'error' else 'green' }}-500 bg-opacity-20 border border-{{ 'red' if category == 'error' else 'green' }}-400 text-white text-sm">
+                            <div class="flash-message mb-6 p-4 rounded-lg bg-{{ 'red' if category == 'error' else 'green' }}-500 bg-opacity-20 border border-{{ 'red' if category == 'error' else 'green' }}-400 text-white text-sm transition-opacity duration-500">
                                 {{ message }}
                             </div>
                         {% endfor %}
@@ -132,6 +132,17 @@
             }
         }
         createStars();
+
+        // Auto-Dismiss Flash Messages
+        document.addEventListener("DOMContentLoaded", function () {
+            const flashes = document.querySelectorAll('.flash-message');
+            flashes.forEach(flash => {
+                setTimeout(() => {
+                    flash.style.opacity = '0';
+                    setTimeout(() => flash.remove(), 500); // Wait for transition to finish
+                }, 5000); // 5 seconds
+            });
+        });
     </script>
 </body>
 </html>

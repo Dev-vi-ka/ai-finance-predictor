@@ -3,170 +3,142 @@
 {% block title %}Budget Alerts{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-5">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h2>🔔 Budget Alerts</h2>
-            <p class="text-muted">Stay informed about your spending</p>
+<div class="py-6 space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-5 rounded-3xl shadow-sm border border-gray-100 gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-black text-gray-800 flex items-center">
+                <span class="bg-amber-100 text-amber-600 p-2 rounded-xl mr-3 h-10 w-10 flex items-center justify-center shrink-0">🔔</span>
+                Budget Alerts
+            </h1>
+            <p class="text-gray-500 font-medium mt-1 text-sm ml-14">Stay informed about your spending limits</p>
         </div>
-        <div class="col-md-4 text-end">
-            <a href="{{ url_for('budget.view_budgets') }}" class="btn btn-secondary">
-                ← Back to Budgets
-            </a>
-        </div>
+        <a href="{{ url_for('budget.view_budgets') }}"
+            class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-2.5 px-5 rounded-xl transition-colors text-sm flex items-center gap-2 whitespace-nowrap">
+            ← Back to Budgets
+        </a>
     </div>
 
     {% if alerts %}
-    <div class="row">
-        <div class="col-md-10">
-            <!-- Alerts List -->
-            {% for alert in alerts %}
-            <div class="card mb-3 shadow-sm alert-card alert-{{ alert.alert_type }}" id="alert-{{ alert.id }}">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-9">
-                            <div class="d-flex align-items-start justify-content-between mb-2">
-                                <div>
-                                    <h5 class="card-title mb-1">
-                                        {% if alert.alert_type == 'budget_exceeded' %}
-                                        ⚠️ {{ alert.title }}
-                                        {% elif alert.alert_type == 'budget_critical' %}
-                                        🔴 {{ alert.title }}
-                                        {% else %}
-                                        📢 {{ alert.title }}
-                                        {% endif %}
-                                    </h5>
-                                </div>
-                                <span class="badge bg-{% if alert.alert_type == 'budget_exceeded' %}danger{% elif alert.alert_type == 'budget_critical' %}warning{% else %}info{% endif %}">
-                                    {% if alert.alert_type == 'budget_exceeded' %}Exceeded
-                                    {% elif alert.alert_type == 'budget_critical' %}Critical
-                                    {% else %}Warning{% endif %}
-                                </span>
-                            </div>
-                            <p class="card-text text-muted mb-2">{{ alert.message }}</p>
-                            {% if alert.percentage %}
-                            <small class="text-muted">
-                                📊 Usage: <strong>{{ "%.1f"|format(alert.percentage) }}%</strong>
-                            </small>
-                            {% endif %}
-                            <br>
-                            <small class="text-muted">
-                                ⏰ {{ alert.created_at }}
-                            </small>
-                        </div>
-                        <div class="col-md-3 text-end">
-                            <div class="btn-group" role="group">
-                                {% if alert.is_read == 0 %}
-                                <button type="button" class="btn btn-sm btn-outline-primary mark-read-btn" 
-                                        data-alert-id="{{ alert.id }}">
-                                    Mark as Read
-                                </button>
-                                {% endif %}
-                                <button type="button" class="btn btn-sm btn-outline-danger delete-alert-btn" 
-                                        data-alert-id="{{ alert.id }}">
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
+    <div class="space-y-4">
+        {% for alert in alerts %}
+        <div class="bg-white rounded-2xl shadow-sm border overflow-hidden flex flex-col sm:flex-row transition-all duration-200 hover:shadow-md
+            {% if alert.alert_type == 'budget_exceeded' %}border-red-200
+            {% elif alert.alert_type == 'budget_critical' %}border-amber-200
+            {% else %}border-blue-200{% endif %}"
+            id="alert-{{ alert.id }}">
+
+            <!-- Left accent strip (visible on sm+) -->
+            <div class="w-full sm:w-1.5 h-1.5 sm:h-auto rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none shrink-0
+                {% if alert.alert_type == 'budget_exceeded' %}bg-red-500
+                {% elif alert.alert_type == 'budget_critical' %}bg-amber-400
+                {% else %}bg-blue-400{% endif %}">
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+                <!-- Icon -->
+                <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0
+                    {% if alert.alert_type == 'budget_exceeded' %}bg-red-100 text-red-600
+                    {% elif alert.alert_type == 'budget_critical' %}bg-amber-100 text-amber-600
+                    {% else %}bg-blue-100 text-blue-600{% endif %}">
+                    {% if alert.alert_type == 'budget_exceeded' %}🚨
+                    {% elif alert.alert_type == 'budget_critical' %}🔴
+                    {% else %}📢{% endif %}
+                </div>
+
+                <!-- Text -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                        <h3 class="font-black text-gray-800 text-base">{{ alert.title }}</h3>
+                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-full
+                            {% if alert.alert_type == 'budget_exceeded' %}bg-red-50 text-red-600 border border-red-100
+                            {% elif alert.alert_type == 'budget_critical' %}bg-amber-50 text-amber-600 border border-amber-100
+                            {% else %}bg-blue-50 text-blue-600 border border-blue-100{% endif %}">
+                            {% if alert.alert_type == 'budget_exceeded' %}Exceeded
+                            {% elif alert.alert_type == 'budget_critical' %}Critical
+                            {% else %}Warning{% endif %}
+                        </span>
+                        {% if alert.is_read == 0 %}
+                        <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100">● Unread</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">{{ alert.message }}</p>
+                    <div class="flex flex-wrap gap-4 text-xs text-gray-400 font-semibold">
+                        {% if alert.percentage %}
+                        <span>📊 Usage: <strong class="text-gray-600">{{ "%.1f"|format(alert.percentage) }}%</strong></span>
+                        {% endif %}
+                        <span>⏰ {{ alert.created_at }}</span>
                     </div>
                 </div>
+
+                <!-- Actions -->
+                <div class="flex flex-row sm:flex-col gap-2 shrink-0">
+                    {% if alert.is_read == 0 %}
+                    <button class="mark-read-btn text-xs font-bold px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-100 transition-colors whitespace-nowrap"
+                        data-alert-id="{{ alert.id }}">
+                        ✓ Mark Read
+                    </button>
+                    {% endif %}
+                    <button class="delete-alert-btn text-xs font-bold px-3 py-2 rounded-xl bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-600 border border-gray-100 hover:border-red-100 transition-colors"
+                        data-alert-id="{{ alert.id }}">
+                        🗑 Delete
+                    </button>
+                </div>
             </div>
-            {% endfor %}
         </div>
+        {% endfor %}
     </div>
 
     {% else %}
     <!-- Empty State -->
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card text-center p-5 shadow-sm">
-                <div class="mb-3" style="font-size: 3rem;">✨</div>
-                <h4>No Alerts</h4>
-                <p class="text-muted">You're doing great! No budget warnings at the moment.</p>
-                <a href="{{ url_for('budget.set_budget_route') }}" class="btn btn-primary">
-                    Create Budgets Now
-                </a>
-            </div>
-        </div>
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-14 text-center">
+        <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">✨</div>
+        <h3 class="text-2xl font-black text-gray-800 mb-2">All Clear!</h3>
+        <p class="text-gray-500 max-w-sm mx-auto mb-6 text-sm font-medium">You're doing great — no budget warnings at the moment.</p>
+        <a href="{{ url_for('budget.set_budget_route') }}"
+            class="bg-gray-900 text-white font-bold py-3 px-8 rounded-xl hover:bg-gray-800 transition-transform hover:-translate-y-1 shadow-lg inline-block">
+            Set More Budgets
+        </a>
     </div>
     {% endif %}
+
 </div>
 
 <script>
 function markAsRead(alertId) {
-    fetch(`/alerts/${alertId}/read`, {
-        method: 'POST'
-    })
-    .then(response => response.json())
+    fetch(`/alerts/${alertId}/read`, { method: 'POST' })
+    .then(r => r.json())
     .then(data => {
         if (data.success) {
             const card = document.getElementById(`alert-${alertId}`);
-            if (card) {
-                card.style.opacity = '0.7';
-            }
-            setTimeout(() => {
-                location.reload();
-            }, 500);
+            if (card) { card.style.opacity = '0.5'; }
+            setTimeout(() => location.reload(), 400);
         }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(e => console.error(e));
 }
 
 function deleteAlert(alertId) {
-    if (confirm('Are you sure you want to delete this alert?')) {
+    if (confirm('Delete this alert?')) {
         const card = document.getElementById(`alert-${alertId}`);
         if (card) {
-            card.style.display = 'none';
+            card.style.transform = 'scale(0.95)';
+            card.style.opacity = '0';
+            card.style.transition = 'all 0.3s';
+            setTimeout(() => card.remove(), 300);
         }
-        // Could add actual delete functionality here
     }
 }
 
-// Attach event listeners using data attributes
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.mark-read-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const alertId = this.getAttribute('data-alert-id');
-            markAsRead(alertId);
-        });
+        btn.addEventListener('click', () => markAsRead(btn.dataset.alertId));
     });
-
     document.querySelectorAll('.delete-alert-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const alertId = this.getAttribute('data-alert-id');
-            deleteAlert(alertId);
-        });
+        btn.addEventListener('click', () => deleteAlert(btn.dataset.alertId));
     });
 });
 </script>
-
-<style>
-    .alert-card {
-        border: none;
-        border-radius: 0.75rem;
-        transition: all 0.2s;
-        border-left: 5px solid #0d6efd;
-    }
-
-    .alert-card.alert-budget_exceeded {
-        border-left-color: #dc3545;
-    }
-
-    .alert-card.alert-budget_critical {
-        border-left-color: #fd7e14;
-    }
-
-    .alert-card.alert-budget_warning {
-        border-left-color: #0d6efd;
-    }
-    
-    .alert-card:hover {
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    }
-    
-    .card {
-        border: none;
-        border-radius: 0.75rem;
-    }
-</style>
 {% endblock %}
